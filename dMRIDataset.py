@@ -187,6 +187,73 @@ class HCPUKADataset(rDataset):
             if sys.argv[2] == "out_regression" or sys.argv[2] == "out_classification":
                 brainmask = np.load(opj(subdir_fiberdir, "peak_dirs.npy"))
 
+
+                if sys.argv[2] == "out_classification":
+                    # select only the first peak
+                    brainmask = brainmask[:, :, :, 0, :] #(76,91,76,3)
+
+                    # safe every peak in one of 8 classes (one-hot vector)
+                    # ATTENTION: Not practical at the moment!
+                    # Implementation misses all peaks on one axis and also a class/idea for 0-vectors!
+                    # Implementation is not fast / good!
+                    new_brainmask = np.zeros([76, 91, 76, 8])
+
+                    # First Octant
+                    new_brainmask[..., 0] = np.where(brainmask[..., 0] > 0, 1, new_brainmask[..., 0])
+                    new_brainmask[..., 0] = np.where(brainmask[..., 1] < 0, 0, new_brainmask[..., 0])
+                    new_brainmask[..., 0] = np.where(brainmask[..., 2] < 0, 0, new_brainmask[..., 0])
+
+                    # Second Octant
+                    new_brainmask[..., 1] = np.where(brainmask[..., 0] < 0, 1, new_brainmask[..., 1])
+                    new_brainmask[..., 1] = np.where(brainmask[..., 1] < 0, 0, new_brainmask[..., 1])
+                    new_brainmask[..., 1] = np.where(brainmask[..., 2] < 0, 0, new_brainmask[..., 1])
+
+                    # 3. Octant
+                    new_brainmask[..., 2] = np.where(brainmask[..., 0] < 0, 1, new_brainmask[..., 2])
+                    new_brainmask[..., 2] = np.where(brainmask[..., 1] > 0, 0, new_brainmask[..., 2])
+                    new_brainmask[..., 2] = np.where(brainmask[..., 2] < 0, 0, new_brainmask[..., 2])
+
+                    # 4. Octant
+                    new_brainmask[..., 3] = np.where(brainmask[..., 0] > 0, 1, new_brainmask[..., 3])
+                    new_brainmask[..., 3] = np.where(brainmask[..., 1] > 0, 0, new_brainmask[..., 3])
+                    new_brainmask[..., 3] = np.where(brainmask[..., 2] < 0, 0, new_brainmask[..., 3])
+
+                    # 5. Octant
+                    new_brainmask[..., 4] = np.where(brainmask[..., 0] > 0, 1, new_brainmask[..., 4])
+                    new_brainmask[..., 4] = np.where(brainmask[..., 1] < 0, 0, new_brainmask[..., 4])
+                    new_brainmask[..., 4] = np.where(brainmask[..., 2] > 0, 0, new_brainmask[..., 4])
+
+                    # 6. Octant
+                    new_brainmask[..., 5] = np.where(brainmask[..., 0] < 0, 1, new_brainmask[..., 5])
+                    new_brainmask[..., 5] = np.where(brainmask[..., 1] < 0, 0, new_brainmask[..., 5])
+                    new_brainmask[..., 5] = np.where(brainmask[..., 2] > 0, 0, new_brainmask[..., 5])
+
+                    # 7. Octant
+                    new_brainmask[..., 6] = np.where(brainmask[..., 0] < 0, 1, new_brainmask[..., 6])
+                    new_brainmask[..., 6] = np.where(brainmask[..., 1] > 0, 0, new_brainmask[..., 6])
+                    new_brainmask[..., 6] = np.where(brainmask[..., 2] > 0, 0, new_brainmask[..., 6])
+
+                    # 8. Octant
+                    new_brainmask[..., 7] = np.where(brainmask[..., 0] > 0, 1, new_brainmask[..., 7])
+                    new_brainmask[..., 7] = np.where(brainmask[..., 1] > 0, 0, new_brainmask[..., 7])
+                    new_brainmask[..., 7] = np.where(brainmask[..., 2] > 0, 0, new_brainmask[..., 7])
+
+                    brainmask = np.moveaxis(new_brainmask, 3, 0)
+                else:
+                    # select only the first peak
+                    brainmask = brainmask[:, :, :, 0, :]  # (76,91,76,3)
+
+                    # Very basic implementation, no further/advanced calculations at the moment!
+                    new_brainmask = np.zeros([76, 91, 76, 2])
+                    sqrtArray = (np.power(brainmask[..., 0], 2) + np.power(brainmask[..., 1], 2) + np.power(brainmask[..., 2], 2))
+                    r = np.sqrt(sqrtArray)
+                    r[np.logical_and(r >= 0.99, r <= 1.01)] = 1
+                    new_brainmask[..., 0] = np.arccos(brainmask[..., 2] / r)  # theta
+                    new_brainmask[..., 1] = np.arctan2(brainmask[..., 1], brainmask[..., 0])  # phi
+
+                    brainmask = np.moveaxis(new_brainmask, 3, 0)
+
+
             if sys.argv[2] == "out_number":
                 brainmask = np.load(opj(subdir_fiberdir, "peak_values.npy"))
                 number_of_peaks = np.count_nonzero(brainmask, axis=3)

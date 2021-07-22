@@ -214,7 +214,7 @@ class Unet3d(LightningModule):
                 plt.imshow(label.cpu().detach().numpy()[0, 2, :, axial_middle, :].T, cmap='gray', origin='lower')
 
                 plt.show()
-            else:
+            elif self.learning_modus == "out":
                 axial_middle = output.shape[2] // 2
                 plt.figure('Showing the datasets')
 
@@ -231,6 +231,8 @@ class Unet3d(LightningModule):
                 plt.imshow(label.cpu().detach().numpy()[0, 1, :, axial_middle, :].T, cmap='gray', origin='lower')
 
                 plt.show()
+            else:
+                print("This output will be here in the near future!")
 
 
         if self.learning_modus == "out" or self.learning_modus == "out_number":
@@ -273,11 +275,14 @@ class Unet3d(LightningModule):
                   "%.")
 
         #important to avoid empty cells in exel sheet
-        if math.isnan(validation_step_outputs[0][1].item()) == True:
-            self.create_logger_file_training(0, validation_step_outputs[0][2].item(), validation_step_outputs[0][0].item())
+        if self.learning_modus == "out_regression":
+            self.create_logger_file_training(0, 0, validation_step_outputs[0][0].item())
         else:
-            self.create_logger_file_training(validation_step_outputs[0][1].item(), validation_step_outputs[0][2].item(),
-                                    validation_step_outputs[0][0].item())
+            if math.isnan(validation_step_outputs[0][1].item()) == True:
+                self.create_logger_file_training(0, validation_step_outputs[0][2].item(), validation_step_outputs[0][0].item())
+            else:
+                self.create_logger_file_training(validation_step_outputs[0][1].item(), validation_step_outputs[0][2].item(),
+                                        validation_step_outputs[0][0].item())
 
     def test_step(self, batch, batch_idx):
 
