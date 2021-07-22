@@ -6,7 +6,7 @@ import sys
 Argument 1:
 
 pre
-Uses the pretrained network for the calculations
+Uses the pretrained network for the calculations (best available version)
 
 nopre
 Doesn't use the pretraining
