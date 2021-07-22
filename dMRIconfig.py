@@ -10,7 +10,7 @@ Uses the pretrained network for the calculations
 
 nopre
 Doesn't use the pretraining
-
+ 
 -------------------------------------------
 
 Argument 2:  
