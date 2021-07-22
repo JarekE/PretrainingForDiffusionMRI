@@ -8,4 +8,4 @@ All 3 tests can be executed, but are in the basic version.
 Segmentation
 Number of Peaks
 Direction of Peak (Classification) (3a)
-Direction of Peak (Regression) (3b)
+Direction of Peak (Regression) (3b) 
