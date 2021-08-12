@@ -4,15 +4,15 @@ from torch.nn import functional as F
 from pytorch_lightning.core.lightning import LightningModule
 from pytorch_lightning.metrics.classification import f_beta
 import math
-from pytorch_lightning.metrics import Accuracy
 import sys
 import matplotlib.pyplot as plt
+import torchmetrics
 
 
 if sys.argv[1] == "server":
-    import config
+    import config_pretrain
 elif sys.argv[1] == "pc_leon":
-    from Pretraining import config
+    from Pretraining import config_pretrain
 else:
     raise Exception("unknown first argument")
 
@@ -54,8 +54,9 @@ class Unet3d(LightningModule):
 
     def __init__(self, in_dim, out_dim, num_filter, out_dim_pretraining, out_dim_regression, out_dim_classification, pretraining_on=False):
         super(Unet3d, self).__init__()
-        self.accuracy = Accuracy()
-        self.f_beta = f_beta.Fbeta
+        self.mse_metric = torchmetrics.MeanSquaredError()
+        self.loss = nn.MSELoss()
+
         self.in_dim = in_dim
         self.out_dim = out_dim
         self.num_filter = num_filter
@@ -123,10 +124,7 @@ class Unet3d(LightningModule):
 
     def training_step(self, batch, batch_idx):
 
-        label = batch['label']
         input = batch['input']
-
-        label = label.cuda(label.device.index)
         input = input.cuda(input.device.index)
 
         output = self.forward(input)
@@ -153,17 +151,16 @@ class Unet3d(LightningModule):
 
             plt.show()
 
-        train_loss_pre = F.l1_loss(label, output)
+        #train_loss_pre = F.l1_loss(input, output)
+        train_loss_pre = F.mse_loss(input, output)
         self.train_loss = train_loss_pre
         return train_loss_pre
 
 
     def validation_step(self, batch, batch_idx):
 
-        label = batch['label']
         input = batch['input']
 
-        label = label.cuda(label.device.index)
         input = input.cuda(input.device.index)
 
         output = self.forward(input)
@@ -172,29 +169,21 @@ class Unet3d(LightningModule):
             axial_middle = output.shape[2] // 2
             plt.figure('Showing the datasets')
 
-            plt.subplot(3, 1, 1).set_axis_off()
+            plt.subplot(2, 1, 1).set_axis_off()
             plt.title("Input")
             plt.imshow(input.cpu().detach().numpy()[0, 11, :, axial_middle, :].T, cmap='gray', origin='lower')
 
-            plt.subplot(3, 1, 2).set_axis_off()
+            plt.subplot(2, 1, 2).set_axis_off()
             plt.title("Output")
             plt.imshow(output.cpu().detach().numpy()[0, 11, :, axial_middle, :].T, cmap='gray', origin='lower')
 
-            plt.subplot(3, 1, 3).set_axis_off()
-            plt.title("Label")
-            plt.imshow(label.cpu().detach().numpy()[0, 11, :, axial_middle, :].T, cmap='gray', origin='lower')
-
             plt.show()
 
-        f1 = self.f_beta(num_classes=4, threshold=0.5, beta=1)
+        loss = self.mse_metric(input.cpu(), output.cpu())
 
-        f1_acc_pre = f1(output.cpu(), label.cpu())
-        acc_pre = self.accuracy(output.cpu(), label.cpu())
+        self.log('val_loss', loss)
 
-        val_loss_pre = F.l1_loss(label, output)
-        self.log('val_loss', val_loss_pre)
-
-        return val_loss_pre, f1_acc_pre, acc_pre
+        return loss
 
 
     def validation_epoch_end(self, validation_step_outputs):
@@ -202,24 +191,19 @@ class Unet3d(LightningModule):
         print("\nAktuelle Epoche:",self.current_epoch)
         print("Pretraining:",self.pretraining_on)
 
-        if math.isnan(validation_step_outputs[0][1].item()) == True:
-            self.create_logger_file_training(0, validation_step_outputs[0][2].item(), validation_step_outputs[0][0].item())
-        else:
-            self.create_logger_file_training(validation_step_outputs[0][1].item(), validation_step_outputs[0][2].item(),
-                                             validation_step_outputs[0][0].item())
+        self.create_logger_file_training(validation_step_outputs[0].item())
+
 
 
     def configure_optimizers(self):
 
-        lr = config.lr
+        lr = config_pretrain.lr
         optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, self.parameters()), lr=lr)
 
         return {'optimizer': optimizer}
 
 
-    def create_logger_file_training(self, f1=0, acc=0, loss=0):
+    def create_logger_file_training(self, loss=0):
 
         self.epochs_list.append(self.current_epoch)
-        self.f1_list.append(f1)
-        self.acc_list.append([acc])
         self.loss_list.append([loss])

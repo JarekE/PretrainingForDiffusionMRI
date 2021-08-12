@@ -1,7 +1,6 @@
 from sys import platform
 import os
 
-
 """
 Arguments
 
@@ -33,7 +32,11 @@ num_classes = out_dim
 lr = 0.001
 only_decoder = False
 pretraining_on = True
-save_path = '/work/scratch/ecke/PretrainingForDiffusionMRI/Pretraining/checkpoints_pretraining/UNET-{epoch:02d}-{val_loss:.2f}'
+
+
+username = os.path.expanduser("~").split("/")[-1]
+dirpath = os.path.join('/work/scratch', username, 'PretrainingForDiffusionMRI/Pretraining/checkpoints_pretraining')
+filename = 'UNET-{epoch:02d}-{val_loss:.2f}'
 checkpoint_name = "checkpoint_pretraining"
 
 

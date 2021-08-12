@@ -4,10 +4,11 @@ from os.path import join as opj
 import numpy as np
 from random import randint
 from dipy.core.gradients import gradient_table_from_bvals_bvecs
-from rising.loading import Dataset as rDataset
+from torch.utils.data import Dataset
+
 import sys
 
-import dMRIconfig
+import config_experiment
 
 
 def transformation_and_artifacts(data, type):
@@ -46,11 +47,11 @@ def create_singlePatches_wholebrain(dwi, mask, type):
     return patches, masks
 
 
-def create_singlePatches_random(dwi, brainmask, type, n_patches=dMRIconfig.n_patches):
+def create_singlePatches_random(dwi, brainmask, type, n_patches=config_experiment.n_patches):
 
     s = brainmask.shape
 
-    patch_size = dMRIconfig.patch_size
+    patch_size = config_experiment.patch_size
     ps2 = np.int(patch_size / 2)
 
     patches_a = []
@@ -82,11 +83,11 @@ def create_singlePatches_random(dwi, brainmask, type, n_patches=dMRIconfig.n_pat
 
     return patches_a, masks
 
-class HCPUKADataset(rDataset):
+class HCPUKADataset(Dataset):
     def __init__(self, ds_type="training", use_preprocessed=False):
 
         self.ds_type = ds_type
-        self.subject_ids = dMRIconfig.subjects[ds_type]
+        self.subject_ids = config_experiment.subjects[ds_type]
 
         if use_preprocessed == False:
             data = self.load_subjects(self.subject_ids)
@@ -98,7 +99,11 @@ class HCPUKADataset(rDataset):
 
 
     def __getitem__(self, idx):
-        return (self.patches[idx], self.masks_train[idx])
+        return {
+            "input": self.patches[idx],
+            "label": self.masks_train[idx]
+        }
+
 
 
     def prepare_data(self, data):
@@ -131,11 +136,11 @@ class HCPUKADataset(rDataset):
 
     def load_subjects(self, subjects=['100307']):
         data = {}
-        datadir_hcp = dMRIconfig.img_path_hcp
+        datadir_hcp = config_experiment.img_path_hcp
 
 
-        datadir_hcp_seg = dMRIconfig.img_path_hcp_seg
-        datadir_hcp_fiberdir = dMRIconfig.img_path_hcp_fiberdir
+        datadir_hcp_seg = config_experiment.img_path_hcp_seg
+        datadir_hcp_fiberdir = config_experiment.img_path_hcp_fiberdir
 
         for subject in subjects:
 

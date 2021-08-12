@@ -3,7 +3,7 @@ import torch
 import torch.nn as nn
 from torch.nn import functional as F
 from pytorch_lightning.core.lightning import LightningModule
-from pytorch_lightning.metrics.classification import f_beta
+import torchmetrics
 import math
 from pytorch_lightning.metrics import Accuracy
 import matplotlib.pyplot as plt
@@ -13,8 +13,9 @@ from os.path import join as opj
 from pandas import DataFrame
 from openpyxl import load_workbook
 import pandas as pd
+import os
 
-import dMRIconfig
+import config_experiment
 
 
 def conv_block(in_dim, out_dim, act_fn):
@@ -57,7 +58,7 @@ class Unet3d(LightningModule):
         super(Unet3d, self).__init__()
         self.accuracy = Accuracy()
         self.MSE = nn.MSELoss()
-        self.f_beta = f_beta.Fbeta
+        self.f_beta = torchmetrics.FBeta
         self.in_dim = in_dim
         self.out_dim = out_dim
         self.num_filter = num_filter
@@ -236,8 +237,8 @@ class Unet3d(LightningModule):
 
 
         if self.learning_modus == "out" or self.learning_modus == "out_number":
-            f1 = self.f_beta(num_classes=4, threshold=0.5, beta=1)
-            f1_acc = f1(output.cpu(), label.cpu())
+            f1 = self.f_beta(num_classes=4, threshold=0.5, beta=1, mdmc_average="samplewise")
+            f1_acc = f1(output.cpu(), torch.argmax(label.cpu().long(), dim=1))
             acc = self.accuracy(output.cpu(), label.cpu())
             val_loss = F.l1_loss(label, output)
             self.log('val_loss', val_loss)
@@ -314,7 +315,7 @@ class Unet3d(LightningModule):
                 acc = 0
 
             #Save mask
-            path = "/work/scratch/ecke/PretrainingForDiffusionMRI/Results/Endmasks"
+            path = os.path.join('/work/scratch', config_experiment.username, 'PretrainingForDiffusionMRI/Results/Endmasks')
             savepath_mask = opj(path, str(i)+str(batch_idx)+str(sys.argv[1])+str(sys.argv[2]))
             np.save(savepath_mask, output.cpu().numpy())
 
@@ -342,7 +343,7 @@ class Unet3d(LightningModule):
         f1_logger.to_excel(writer, sheet_name="logs", index=True, header=False, startrow=len(reader) + 1)
         writer.close()
         '''
-        save_path_f1 = '/work/scratch/ecke/PretrainingForDiffusionMRI/Results/Metrics_Table' + '/end_logs.xlsx'
+        save_path_f1 = os.path.join('/work/scratch', username, 'PretrainingForDiffusionMRI/Results/Metrics_Table' + '/end_logs.xlsx')
 
         f1_logger = DataFrame({'Epoche': self.epochs_list_test,
                                'f1 Score': self.f1_list_test,
@@ -361,7 +362,7 @@ class Unet3d(LightningModule):
 
     def configure_optimizers(self):
 
-        lr = dMRIconfig.lr
+        lr = config_experiment.lr
         optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, self.parameters()), lr=lr)
 
         return {'optimizer': optimizer}

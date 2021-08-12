@@ -48,13 +48,17 @@ num_filter = 16
 num_classes = out_dim
 lr = 0.001
 only_decoder = False
-save_path = '/work/scratch/ecke/PretrainingForDiffusionMRI/Results/UNET-{epoch:02d}-{val_loss:.2f}'+str(sys.argv[1])+str(sys.argv[2])
+
+username = os.path.expanduser("~").split("/")[-1]
+dirpath = os.path.join('/work/scratch', username, 'PretrainingForDiffusionMRI/Results/')
+filename = 'UNET-{epoch:02d}-{val_loss:.2f}'+str(sys.argv[1])+str(sys.argv[2])
+
 pretraining = sys.argv[1]
 
 
 if sys.argv[1] == "pre":
     #IMPORTANT: This is a test version, the pretraining is not scaled yet and just for showing the possibility
-    checkpoint = '/work/scratch/ecke/PretrainingForDiffusionMRI/Pretraining/checkpoints_pretraining/UNET-epoch=14-val_loss=602.89.ckpt'
+    checkpoint = os.path.join('/work/scratch', username, 'PretrainingForDiffusionMRI/Pretraining/checkpoints_pretraining/UNET-epoch=14-val_loss=602.89.ckpt')
     max_epochs = (200 + 100)
     learning_modus = sys.argv[2]
 elif sys.argv[1] == "nopre":

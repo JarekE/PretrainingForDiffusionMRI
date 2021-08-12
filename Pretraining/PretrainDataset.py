@@ -4,14 +4,15 @@ from os.path import join as opj
 import numpy as np
 from random import randint
 from dipy.core.gradients import gradient_table_from_bvals_bvecs
-from rising.loading import Dataset as rDataset
 import sys
+from torch.utils.data import Dataset
+
 
 
 if sys.argv[1] == "server":
-    import config
+    import config_pretrain
 elif sys.argv[1] == "pc_leon":
-    from Pretraining import config
+    from Pretraining import config_pretrain
 else:
     raise Exception("unknown first argument")
 
@@ -20,36 +21,25 @@ else:
 def create_singlePatches_wholebrain(dwi, mask, type):
 
     patch = np.moveaxis(dwi, 3, 0)
-    del dwi
 
     #every site of the picture has to be --> site mod 8 = 0
     if type == "validation":
 
-        patch_new_8 = patch[:,2:-2,1:-2, 2:-2]
-        patch = patch_new_8
-
-        mask = patch_new_8
-
-    else:
-        # here one can implement extensions to extend all possible pictures to the right size
-        patch = patch
-        mask = mask
+        patch = patch[:,2:-2,1:-2, 2:-2]
 
     patches = [patch]
-    masks = [mask]
 
-    return patches, masks
+    return patches
 
 
-def create_singlePatches_random(dwi, brainmask, type, n_patches=config.n_patches):
+def create_singlePatches_random(dwi, brainmask, type, n_patches=config_pretrain.n_patches):
 
     s = brainmask.shape
 
-    patch_size = config.patch_size
+    patch_size = config_pretrain.patch_size
     ps2 = np.int(patch_size / 2)
 
     patches_a = []
-    masks = []
 
     np_dwi = np.moveaxis(dwi, 3, 0)
 
@@ -66,67 +56,57 @@ def create_singlePatches_random(dwi, brainmask, type, n_patches=config.n_patches
 
         if type == "pretraining":
             patch = np_dwi[:, x - ps2:x + ps2, y - ps2:y + ps2, z - ps2:z + ps2]
-            # short version of RemoveB0Layer for new masks
-            #patch = patch[1:, :, :, :]
-            mask = np_dwi[:, x - ps2:x + ps2, y - ps2:y + ps2, z - ps2:z + ps2]
 
         patches_a.append(patch)
-        masks.append(mask.astype(np.float32))
         n = patches_a.__len__()
 
-    return patches_a, masks
+    return patches_a
 
 
-class HCPUKADataset(rDataset):
+class PretrainDataset(Dataset):
     def __init__(self, ds_type="train", use_preprocessed=False):
 
         self.ds_type = ds_type
-        self.subject_ids = config.subjects[ds_type]
+        self.subject_ids = config_pretrain.subjects[ds_type]
 
         if use_preprocessed == False:
             data = self.load_subjects(self.subject_ids)
-            self.patches, self.masks_train, self.bvals, self.bvecs = self.prepare_data(data)
-
+            self.patches, self.bvals, self.bvecs = self.prepare_data(data)
 
     def __len__(self):
         return len(self.patches)
 
-
     def __getitem__(self, idx):
-        return (self.patches[idx], self.masks_train[idx])
-
+        return {
+            "input": self.patches[idx],
+        }
 
     def prepare_data(self, data):
         patches = []
-        wm_masks = []
         bvals = []
         bvecs = []
         for subject in data.values():
 
             if self.ds_type == "pretraining":
-                patches_ss, wm_masks_ss = create_singlePatches_random(subject['dwi'],
+                patches_ss = create_singlePatches_random(subject['dwi'],
                                                                       subject['bm'],
                                                                       type=self.ds_type)
             elif self.ds_type == "validation":
-                patches_ss, wm_masks_ss = create_singlePatches_wholebrain(subject['dwi'],
+                patches_ss = create_singlePatches_wholebrain(subject['dwi'],
                                                                           subject['bm'],
                                                                           self.ds_type)
             else:
                 raise Exception("unknown mode")
             patches.extend(patches_ss)
-            wm_masks.extend(wm_masks_ss)
             bvals.extend(subject["gtab"].bvals)
             bvecs.extend(subject["gtab"].bvecs)
-            del patches_ss
-            del wm_masks_ss
-            del subject
 
-        return patches, wm_masks, bvals, bvecs
+        return patches, bvals, bvecs
 
 
     def load_subjects(self, subjects=['100307']):
         data = {}
-        datadir_hcp = config.img_path_hcp
+        datadir_hcp = config_pretrain.img_path_hcp
 
         for subject in subjects:
 

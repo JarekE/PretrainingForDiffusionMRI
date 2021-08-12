@@ -5,7 +5,7 @@ from pytorch_lightning.callbacks import ModelCheckpoint
 
 from dMRIUNetModule import Unet3d
 import dMRIDataLoader
-import dMRIconfig
+import config_experiment
 
 
 def main():
@@ -15,43 +15,44 @@ def main():
     # Reproducibility for every run (important to compare pretraining)
     # seed_everything(42)
 
-    model = Unet3d(in_dim=dMRIconfig.in_dim,
-                   out_dim=dMRIconfig.out_dim,
-                   num_filter=dMRIconfig.num_filter,
-                   out_dim_pretraining=dMRIconfig.out_dim_pretraining,
-                   learning_modus=dMRIconfig.learning_modus,
-                   out_dim_regression=dMRIconfig.out_dim_regression,
-                   out_dim_classification=dMRIconfig.out_dim_classification,
-                   pretraining=dMRIconfig.pretraining)
+    model = Unet3d(in_dim=config_experiment.in_dim,
+                   out_dim=config_experiment.out_dim,
+                   num_filter=config_experiment.num_filter,
+                   out_dim_pretraining=config_experiment.out_dim_pretraining,
+                   learning_modus=config_experiment.learning_modus,
+                   out_dim_regression=config_experiment.out_dim_regression,
+                   out_dim_classification=config_experiment.out_dim_classification,
+                   pretraining=config_experiment.pretraining)
 
     dataloader = dMRIDataLoader.DataModule()
 
     checkpoint_callback = ModelCheckpoint(monitor='val_loss',
-                                          filepath=dMRIconfig.save_path,
+                                          dirpath=config_experiment.dirpath,
+                                          filename=config_experiment.filename,
                                           save_top_k=1)
 
     trainer = pl.Trainer(gpus=1,
-                         max_epochs=dMRIconfig.max_epochs,
-                         checkpoint_callback=checkpoint_callback,
+                         max_epochs=config_experiment.max_epochs,
+                         callbacks=[checkpoint_callback],
                          deterministic=True,
-                         resume_from_checkpoint=dMRIconfig.checkpoint)
+                         resume_from_checkpoint=config_experiment.checkpoint)
 
     trainer.fit(model, datamodule=dataloader)
 
 
     where_is_checkpoint = checkpoint_callback.best_model_path
 
-    test_model = Unet3d(in_dim=dMRIconfig.in_dim,
-               out_dim=dMRIconfig.out_dim,
-               num_filter=dMRIconfig.num_filter,
-               out_dim_pretraining=dMRIconfig.out_dim_pretraining,
-               learning_modus=dMRIconfig.learning_modus,
-               out_dim_regression=dMRIconfig.out_dim_regression,
-               out_dim_classification=dMRIconfig.out_dim_classification,
-               pretraining=dMRIconfig.pretraining)
+    test_model = Unet3d(in_dim=config_experiment.in_dim,
+                        out_dim=config_experiment.out_dim,
+                        num_filter=config_experiment.num_filter,
+                        out_dim_pretraining=config_experiment.out_dim_pretraining,
+                        learning_modus=config_experiment.learning_modus,
+                        out_dim_regression=config_experiment.out_dim_regression,
+                        out_dim_classification=config_experiment.out_dim_classification,
+                        pretraining=config_experiment.pretraining)
 
     test_trainer = pl.Trainer(gpus=1,
-                              max_epochs=dMRIconfig.max_epochs,
+                              max_epochs=config_experiment.max_epochs,
                               checkpoint_callback=checkpoint_callback,
                               deterministic=True,
                               resume_from_checkpoint=where_is_checkpoint)
