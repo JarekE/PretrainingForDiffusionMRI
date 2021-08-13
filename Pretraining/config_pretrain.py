@@ -14,13 +14,13 @@ func_test = False
 max_epochs = 15
 
 # Changeable
-n_batches = 10
-patch_size = 48
+#n_batches = 10
+#patch_size = 48
 batch_size = 3
-n_patches = n_batches * batch_size
+#n_patches = n_batches * batch_size
 
 # Parameters of the network. For this data not changeable.
-preprocessed = False
+#preprocessed = False
 in_dim = 90
 out_dim = 4
 max_channels = in_dim + 1  # B0 layer will be removed afterwards
@@ -32,26 +32,18 @@ num_classes = out_dim
 lr = 0.001
 only_decoder = False
 pretraining_on = True
-
+training_samples_per_epoch = 100
 
 username = os.path.expanduser("~").split("/")[-1]
 dirpath = os.path.join('/work/scratch', username, 'PretrainingForDiffusionMRI/Pretraining/checkpoints_pretraining')
 filename = 'UNET-{epoch:02d}-{val_loss:.2f}'
 checkpoint_name = "checkpoint_pretraining"
 
+log_dir = os.path.join('/work/scratch', username, 'tensorboard_logger/pretrain_checkpoints')
 
-def get_image_dir_hcp():
-    if platform == "linux":
-        data_dir = '/work/scratch/ecke/PretrainingForDiffusionMRI/Data'
-    elif platform == "darwin":
-        data_dir = '/Volumes/work/scratch/ecke/PretrainingForDiffusionMRI/Data'
-    else:
-        print("platform not detected")
-        raise Exception
-    return data_dir
+img_path_hcp = '/images/Diffusion_Imaging/PretrainingAutoencoder2021'
 
 
-img_path_hcp = get_image_dir_hcp()
 hcp_subjects = os.listdir(img_path_hcp)
 hcp_subjects.sort()
 
@@ -65,6 +57,6 @@ else:
     # TESTDATA
     subjects = {
         "all": [],
-        "pretraining": hcp_subjects[0:4],
-        "validation": hcp_subjects[0:4],
+        "pretraining": hcp_subjects[0:3],
+        "validation": hcp_subjects[0:3],
     }

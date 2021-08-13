@@ -4,18 +4,21 @@ from pytorch_lightning.callbacks import ModelCheckpoint
 # from pytorch_lightning import seed_everything
 import sys
 
+from pytorch_lightning.loggers import TensorBoardLogger
 
-if sys.argv[1] == "server":
-    from Pretraining.PretrainUNetModule import Unet3d
-    import PretrainDataLoader
-    import config_pretrain
-elif sys.argv[1] == "pc_leon":
-    from Pretraining.PretrainUNetModule import Unet3d
-    from Pretraining import PretrainDataLoader
-    from Pretraining import config_pretrain
-else:
-    raise Exception("unknown first argument")
-
+# if sys.argv[1] == "server":
+#     from Pretraining.PretrainUNetModule import PretrainAutoencoder
+#     import PretrainDataLoader
+#     import config_pretrain
+# elif sys.argv[1] == "pc_leon":
+#     from Pretraining.PretrainUNetModule import PretrainAutoencoder
+#     from Pretraining import PretrainDataLoader
+#     from Pretraining import config_pretrain
+# else:
+#     raise Exception("unknown first argument")
+from PretrainModule import PretrainAutoencoder
+import PretrainDataLoader
+import config_pretrain
 
 def main():
 
@@ -24,27 +27,26 @@ def main():
     # Reproducibility for every run (important to compare pretraining)
     # seed_everything(42)
 
-    model = Unet3d(in_dim=config_pretrain.in_dim,
-                   out_dim=config_pretrain.out_dim,
-                   num_filter=config_pretrain.num_filter,
-                   out_dim_pretraining=config_pretrain.out_dim_pretraining,
-                   pretraining_on=config_pretrain.pretraining_on,
-                   out_dim_regression=config_pretrain.out_dim_regression,
-                   out_dim_classification=config_pretrain.out_dim_classification)
+    model = PretrainAutoencoder()
 
-    dataloader = PretrainDataLoader.DataModule()
+    dataloader = PretrainDataLoader.PretrainDataModule(distortions=True)
 
-    checkpoint_callback = ModelCheckpoint(monitor='val_loss',
+    checkpoint_callback = ModelCheckpoint(monitor='Loss/Validation',
                                           dirpath=config_pretrain.dirpath,
                                           filename=config_pretrain.filename,
                                           save_top_k=1)
 
+    logger = TensorBoardLogger(config_pretrain.log_dir, name="Pretrain", default_hp_metric=False)
+
     trainer = pl.Trainer(gpus=1,
                          max_epochs=config_pretrain.max_epochs,
                          callbacks=[checkpoint_callback],
-                         deterministic=True)
+                         deterministic=True,
+                         logger=logger,
+                         log_every_n_steps=10)
 
     trainer.fit(model, datamodule=dataloader)
+
 
 if __name__ == '__main__':
     main()

@@ -148,8 +148,9 @@ class HCPUKADataset(Dataset):
             subdir_seg = opj(datadir_hcp_seg, subject)
             subdir_fiberdir = opj(datadir_hcp_fiberdir, subject)
 
-
             brainmask, _ = load_nifti(opj(subdir_seg, "segmentation.nii.gz"))
+            # TODO: segmentation.nii.gz is not a brainmask???
+
             dwi, aff = load_nifti(opj(subdir, "dwi.nii.gz"))
             dwi = dwi * np.expand_dims(brainmask, axis=-1)
             bvals, bvecs = read_bvals_bvecs(opj(subdir, "bvals"), opj(subdir, "bvecs"))
