@@ -1,22 +1,16 @@
 import torch
 import torch.nn as nn
 
-import config_pretrain
-#if sys.argv[1] == "server":
-#    import config_pretrain
-#elif sys.argv[1] == "pc_leon":
-#    from Pretraining import config_pretrain
-#else:
-#    raise Exception("unknown first argument")
+import config
+
 
 class UNet3d(nn.Module):
     def __init__(self):
         super(UNet3d, self).__init__()
 
-        self.in_dim = config_pretrain.in_dim
-        self.out_dim = config_pretrain.out_dim
-        self.num_filter = config_pretrain.num_filter
-        self.pretraining_on = config_pretrain.pretraining_on
+        self.in_dim = config.in_dim
+        self.out_dim = config.out_dim
+        self.num_filter = config.num_filter
         act_fn = nn.ReLU(inplace=True)
 
         #%% UNet body
@@ -37,17 +31,6 @@ class UNet3d(nn.Module):
 
         self.trans_3 = self.up_conv(self.num_filter * 2, self.num_filter * 2, act_fn)
         self.up_3 = self.double_conv_block(self.num_filter * 3, self.num_filter, act_fn)
-
-        #%% The different heads
-        self.out_pretraining = self.out_block(self.num_filter, config_pretrain.out_dim_pretraining)
-        self.out = self.out_block(self.num_filter, config_pretrain.out_dim)
-        self.out_regression = self.out_block(self.num_filter, config_pretrain.out_dim_regression)
-        self.out_classification = self.out_block(self.num_filter, config_pretrain.out_dim_classification)
-
-        self.epochs_list = []
-        self.f1_list = []
-        self.acc_list = []
-        self.loss_list = []
 
     def conv_block(self, in_dim, out_dim, act_fn):
         model = nn.Sequential(
@@ -99,9 +82,4 @@ class UNet3d(nn.Module):
         concat_3 = torch.cat([trans_3, down_1], dim=1)
         up_3 = self.up_3(concat_3)
 
-        if self.pretraining_on == True:
-            out_pretraining = self.out_pretraining(up_3)
-            return out_pretraining
-        else:
-            out = self.out(up_3)
-            return out
+        return up_3

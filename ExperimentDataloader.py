@@ -1,40 +1,26 @@
 import pytorch_lightning as pl
-#import rising.transforms as rtr
-#from rising.loading import default_transform_call
 from torch.utils.data import DataLoader
-from torchvision import transforms
-import torch
-import config_experiment
-import ExperimentDataset
 
+import config
+from ExperimentDataset import UKADataset
 
 class DataModule(pl.LightningDataModule):
 
-    def __init__(self):
+    def __init__(self, learning_mode):
         super().__init__()
+        self.learning_mode = learning_mode
 
     def train_dataloader(self):
-
-        self.train_dataset_pre = ExperimentDataset.UKADataset(ds_type="training",
-                                                              use_preprocessed=config_experiment.preprocessed)
-        self.dataloader = DataLoader(self.train_dataset_pre, batch_size=config_experiment.batch_size,
+        self.train_dataset_pre = UKADataset(type="training", learning_mode=self.learning_mode)
+        return DataLoader(self.train_dataset_pre, batch_size=config.batch_size,
                                      shuffle=False, num_workers=0)
 
-        return self.dataloader
-
-
     def val_dataloader(self):
-
-        self.val_dataset_pre = ExperimentDataset.UKADataset(ds_type="validation",
-                                                            use_preprocessed=config_experiment.preprocessed)
-        self.val_dataloader = DataLoader(self.val_dataset_pre, batch_size=config_experiment.batch_size,
+        self.val_dataset_pre = UKADataset(type="validation", learning_mode=self.learning_mode)
+        return DataLoader(self.val_dataset_pre, batch_size=config.batch_size,
                                          shuffle=False, num_workers=0)
 
-        return self.val_dataloader
-
     def test_dataloader(self):
-
-        self.test_dataset = ExperimentDataset.UKADataset(ds_type="test", use_preprocessed=config_experiment.preprocessed)
-
-        return DataLoader(self.test_dataset, batch_size=config_experiment.batch_size,
-                          shuffle=False, num_workers=0, batch_transforms=self.composed)
+        self.test_dataset = UKADataset(type="test", learning_mode=self.learning_mode)
+        return DataLoader(self.test_dataset, batch_size=config.batch_size,
+                          shuffle=False, num_workers=0)

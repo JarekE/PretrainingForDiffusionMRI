@@ -2,25 +2,30 @@ import torch
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks import ModelCheckpoint
 # from pytorch_lightning import seed_everything
-
+from os.path import join as opj
 from pytorch_lightning.loggers import TensorBoardLogger
+import sys
 
-# if sys.argv[1] == "server":
-#     from Pretraining.PretrainUNetModule import PretrainAutoencoder
-#     import PretrainDataLoader
-#     import config_pretrain
-# elif sys.argv[1] == "pc_leon":
-#     from Pretraining.PretrainUNetModule import PretrainAutoencoder
-#     from Pretraining import PretrainDataLoader
-#     from Pretraining import config_pretrain
-# else:
-#     raise Exception("unknown first argument")
 from PretrainModule import PretrainAutoencoder
 import PretrainDataloader
-import config_pretrain
+import config
+
+'''
+Argument 1:
+
+dist
+Implements distortions of input data
+
+nodist
+Data has no distortions
+'''
+
 
 def main():
-
+    if sys.argv[1] == "dist":
+        distortions = True
+    elif sys.argv[1] == "nodist":
+        distortions = False
     torch.cuda.empty_cache()
 
     # Reproducibility for every run (important to compare pretraining)
@@ -28,23 +33,24 @@ def main():
 
     model = PretrainAutoencoder()
 
-    dataloader = PretrainDataloader.PretrainDataModule(distortions=True)
+    dataloader = PretrainDataloader.PretrainDataModule(distortions=distortions)
 
     checkpoint_callback = ModelCheckpoint(monitor='Loss/Validation',
-                                          dirpath=config_pretrain.dirpath,
-                                          filename=config_pretrain.filename,
+                                          dirpath=config.dirpath,
+                                          filename=config.filename,
                                           save_top_k=1)
 
-    logger = TensorBoardLogger(config_pretrain.log_dir, name="Pretrain", default_hp_metric=False)
+    logger = TensorBoardLogger(config.log_dir, name="Pretrain", default_hp_metric=False)
 
     trainer = pl.Trainer(gpus=1,
-                         max_epochs=config_pretrain.max_epochs,
+                         max_epochs=config.max_epochs,
                          callbacks=[checkpoint_callback],
                          deterministic=True,
                          logger=logger,
                          log_every_n_steps=10)
 
     trainer.fit(model, datamodule=dataloader)
+    torch.save(model.unet.state_dict(), opj(config.dirpath, "pretrained_model.pt"))
 
 
 if __name__ == '__main__':

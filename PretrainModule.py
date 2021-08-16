@@ -3,9 +3,10 @@ import torch.nn as nn
 import pytorch_lightning as pl
 import matplotlib.pyplot as plt
 import torchmetrics
-from UNet3d import UNet3d
 
-import config_pretrain
+from UNet3d import UNet3d
+import config
+
 
 class PretrainAutoencoder(pl.LightningModule):
 
@@ -14,45 +15,17 @@ class PretrainAutoencoder(pl.LightningModule):
         self.mse_metric = torchmetrics.MeanSquaredError()
         self.loss = nn.MSELoss()
 
-        self.model = UNet3d()
+        self.unet = UNet3d()
+        self.out_block = nn.Conv3d(config.num_filter, config.in_dim, kernel_size=1)
 
     def forward(self, z):
-        return self.model(z)
+        y = self.unet(z)
+        return self.out_block(y)
 
     def training_step(self, batch, batch_idx):
         input = batch['input']
         groundtruth = batch["original"]
-        output = self.model(input)
-
-        if 0:
-            axial_middle = output.shape[2] // 2
-            plt.figure('Showing the datasets')
-
-            plt.subplot(2, 3, 1).set_axis_off()
-            plt.title("Groundtruth")
-            plt.imshow(groundtruth.cpu().detach().numpy()[0, 11, :, axial_middle, :].T, cmap='gray', origin='lower')
-
-            plt.subplot(2, 3, 2).set_axis_off()
-            plt.title("Input")
-            plt.imshow(input.cpu().detach().numpy()[0, 11, :, axial_middle, :].T, cmap='gray', origin='lower')
-
-            plt.subplot(2, 3, 3).set_axis_off()
-            plt.title("Output")
-            plt.imshow(output.cpu().detach().numpy()[0, 11, :, axial_middle, :].T, cmap='gray', origin='lower')
-
-            plt.subplot(2, 3, 4).set_axis_off()
-            plt.title("Groundtruth")
-            plt.imshow(groundtruth.cpu().detach().numpy()[1, 11, :, axial_middle, :].T, cmap='gray', origin='lower')
-
-            plt.subplot(2, 3, 5).set_axis_off()
-            plt.title("Input")
-            plt.imshow(input.cpu().detach().numpy()[1, 11, :, axial_middle, :].T, cmap='gray', origin='lower')
-
-            plt.subplot(2, 3, 6).set_axis_off()
-            plt.title("Output")
-            plt.imshow(output.cpu().detach().numpy()[1, 11, :, axial_middle, :].T, cmap='gray', origin='lower')
-
-            plt.show()
+        output = self.forward(input)
 
         loss = self.loss(output, groundtruth)
 
@@ -61,12 +34,11 @@ class PretrainAutoencoder(pl.LightningModule):
 
         return loss
 
-
     def validation_step(self, batch, batch_idx):
 
         input = batch['input']
         groundtruth = batch["original"]
-        output = self.model(input)
+        output = self.forward(input)
 
         loss = self.mse_metric(input.cpu(), output.cpu())
         self.log('Loss/Validation', loss)
@@ -89,7 +61,7 @@ class PretrainAutoencoder(pl.LightningModule):
 
     def configure_optimizers(self):
 
-        lr = config_pretrain.lr
+        lr = config.lr
         optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, self.parameters()), lr=lr)
 
         return {'optimizer': optimizer}

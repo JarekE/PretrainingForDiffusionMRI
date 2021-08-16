@@ -1,63 +1,78 @@
 import torch
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks import ModelCheckpoint
+from pytorch_lightning.loggers import TensorBoardLogger
+
 # from pytorch_lightning import seed_everything
 
-from ExperimentModule import Unet3d
+from ExperimentModule import ExperimentModule
 import ExperimentDataloader
-import config_experiment
+import sys
+
+import config
+
+'''
+Argument 1:
+
+pre
+Uses the pretrained network for the calculations (best available version)
+
+nopre
+Doesn't use the pretraining
+
+-------------------------------------------
+
+Argument 2:  
+
+segmentation (Experiment 1)
+Use for normal classification of the brain components (WM, GM, CSF, BG)
+
+n_peaks (Experiment 2)
+Number of fiber directions in one voxel (0-3)
+
+regression (Experiment 3a)
+Use for regression task with two parameters (direction of first fiber, e.g. polar coordinates)
+
+'''
 
 
 def main():
+    if sys.argv[1] == "pre":
+        pretrained = True
+    elif sys.argv[1] == "nopre":
+        pretrained = False
+
+    learning_mode = sys.argv[2]
+    if not learning_mode in ("segmentation", "n_peaks", "regression"):
+        print("unkown learning mode")
+        raise Exception
+
 
     torch.cuda.empty_cache()
 
     # Reproducibility for every run (important to compare pretraining)
     # seed_everything(42)
 
-    model = Unet3d(in_dim=config_experiment.in_dim,
-                   out_dim=config_experiment.out_dim,
-                   num_filter=config_experiment.num_filter,
-                   out_dim_pretraining=config_experiment.out_dim_pretraining,
-                   learning_modus=config_experiment.learning_modus,
-                   out_dim_regression=config_experiment.out_dim_regression,
-                   out_dim_classification=config_experiment.out_dim_classification,
-                   pretraining=config_experiment.pretraining)
+    model = ExperimentModule(learning_mode=learning_mode, pretrained=pretrained)
 
-    dataloader = ExperimentDataloader.DataModule()
+    dataloader = ExperimentDataloader.DataModule(learning_mode=learning_mode)
 
-    checkpoint_callback = ModelCheckpoint(monitor='val_loss',
-                                          dirpath=config_experiment.dirpath,
-                                          filename=config_experiment.filename,
+    checkpoint_callback = ModelCheckpoint(monitor='Loss/Validation',
+                                          dirpath=config.dirpath,
+                                          filename=config.filename,
                                           save_top_k=1)
 
+    logger = TensorBoardLogger(config.log_dir, name="Pretrain", default_hp_metric=False)
+
     trainer = pl.Trainer(gpus=1,
-                         max_epochs=config_experiment.max_epochs,
+                         max_epochs=config.max_epochs,
                          callbacks=[checkpoint_callback],
                          deterministic=True,
-                         resume_from_checkpoint=config_experiment.checkpoint)
+                         logger=logger,
+                         log_every_n_steps=10,
+                         resume_from_checkpoint=0)
 
     trainer.fit(model, datamodule=dataloader)
-
-
-    where_is_checkpoint = checkpoint_callback.best_model_path
-
-    test_model = Unet3d(in_dim=config_experiment.in_dim,
-                        out_dim=config_experiment.out_dim,
-                        num_filter=config_experiment.num_filter,
-                        out_dim_pretraining=config_experiment.out_dim_pretraining,
-                        learning_modus=config_experiment.learning_modus,
-                        out_dim_regression=config_experiment.out_dim_regression,
-                        out_dim_classification=config_experiment.out_dim_classification,
-                        pretraining=config_experiment.pretraining)
-
-    test_trainer = pl.Trainer(gpus=1,
-                              max_epochs=config_experiment.max_epochs,
-                              checkpoint_callback=checkpoint_callback,
-                              deterministic=True,
-                              resume_from_checkpoint=where_is_checkpoint)
-
-    test_trainer.test(test_model, test_dataloaders=dataloader.test_dataloader())
 
 
 if __name__ == '__main__':
