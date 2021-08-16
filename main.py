@@ -3,8 +3,8 @@ import pytorch_lightning as pl
 from pytorch_lightning.callbacks import ModelCheckpoint
 # from pytorch_lightning import seed_everything
 
-from dMRIUNetModule import Unet3d
-import dMRIDataLoader
+from ExperimentModule import Unet3d
+import ExperimentDataloader
 import config_experiment
 
 
@@ -24,7 +24,7 @@ def main():
                    out_dim_classification=config_experiment.out_dim_classification,
                    pretraining=config_experiment.pretraining)
 
-    dataloader = dMRIDataLoader.DataModule()
+    dataloader = ExperimentDataloader.DataModule()
 
     checkpoint_callback = ModelCheckpoint(monitor='val_loss',
                                           dirpath=config_experiment.dirpath,

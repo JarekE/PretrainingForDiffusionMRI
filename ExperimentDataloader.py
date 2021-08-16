@@ -5,7 +5,7 @@ from torch.utils.data import DataLoader
 from torchvision import transforms
 import torch
 import config_experiment
-import dMRIDataset
+import ExperimentDataset
 
 
 class DataModule(pl.LightningDataModule):
@@ -15,8 +15,8 @@ class DataModule(pl.LightningDataModule):
 
     def train_dataloader(self):
 
-        self.train_dataset_pre = dMRIDataset.HCPUKADataset(ds_type="training",
-                                                           use_preprocessed=config_experiment.preprocessed)
+        self.train_dataset_pre = ExperimentDataset.UKADataset(ds_type="training",
+                                                              use_preprocessed=config_experiment.preprocessed)
         self.dataloader = DataLoader(self.train_dataset_pre, batch_size=config_experiment.batch_size,
                                      shuffle=False, num_workers=0)
 
@@ -25,8 +25,8 @@ class DataModule(pl.LightningDataModule):
 
     def val_dataloader(self):
 
-        self.val_dataset_pre = dMRIDataset.HCPUKADataset(ds_type="validation",
-                                                         use_preprocessed=config_experiment.preprocessed)
+        self.val_dataset_pre = ExperimentDataset.UKADataset(ds_type="validation",
+                                                            use_preprocessed=config_experiment.preprocessed)
         self.val_dataloader = DataLoader(self.val_dataset_pre, batch_size=config_experiment.batch_size,
                                          shuffle=False, num_workers=0)
 
@@ -34,7 +34,7 @@ class DataModule(pl.LightningDataModule):
 
     def test_dataloader(self):
 
-        self.test_dataset = dMRIDataset.HCPUKADataset(ds_type="test", use_preprocessed=config_experiment.preprocessed)
+        self.test_dataset = ExperimentDataset.UKADataset(ds_type="test", use_preprocessed=config_experiment.preprocessed)
 
         return DataLoader(self.test_dataset, batch_size=config_experiment.batch_size,
                           shuffle=False, num_workers=0, batch_transforms=self.composed)

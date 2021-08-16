@@ -2,7 +2,6 @@ import torch
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks import ModelCheckpoint
 # from pytorch_lightning import seed_everything
-import sys
 
 from pytorch_lightning.loggers import TensorBoardLogger
 
@@ -17,7 +16,7 @@ from pytorch_lightning.loggers import TensorBoardLogger
 # else:
 #     raise Exception("unknown first argument")
 from PretrainModule import PretrainAutoencoder
-import PretrainDataLoader
+import PretrainDataloader
 import config_pretrain
 
 def main():
@@ -29,7 +28,7 @@ def main():
 
     model = PretrainAutoencoder()
 
-    dataloader = PretrainDataLoader.PretrainDataModule(distortions=True)
+    dataloader = PretrainDataloader.PretrainDataModule(distortions=True)
 
     checkpoint_callback = ModelCheckpoint(monitor='Loss/Validation',
                                           dirpath=config_pretrain.dirpath,

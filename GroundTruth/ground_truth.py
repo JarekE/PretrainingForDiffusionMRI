@@ -18,11 +18,11 @@ import sys
 if sys.argv[2] == "server":
     import semantic_segmentation
     import diffusion_fiber_GroundTruth
-    import prepare_data
+    import copy_uka
 elif sys.argv[2] == "pc_leon":
     from GroundTruth import semantic_segmentation
     from GroundTruth import diffusion_fiber_GroundTruth
-    from GroundTruth import prepare_data
+    from GroundTruth import copy_uka
 else:
     raise Exception("unknown second argument")
 
@@ -31,7 +31,7 @@ def main():
 
     # prepare the data for the experiments and safe this in my folder structure
     if 0:
-        prepare_data.data()
+        copy_uka.data()
 
     # Experiment 1 - Segmentation
     if 0:

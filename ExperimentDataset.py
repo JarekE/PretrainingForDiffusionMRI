@@ -83,15 +83,14 @@ def create_singlePatches_random(dwi, brainmask, type, n_patches=config_experimen
 
     return patches_a, masks
 
-class HCPUKADataset(Dataset):
-    def __init__(self, ds_type="training", use_preprocessed=False):
+class UKADataset(Dataset):
+    def __init__(self, ds_type="training"):
 
         self.ds_type = ds_type
         self.subject_ids = config_experiment.subjects[ds_type]
 
-        if use_preprocessed == False:
-            data = self.load_subjects(self.subject_ids)
-            self.patches, self.masks_train, self.bvals, self.bvecs = self.prepare_data(data)
+        data = self.load_subjects(self.subject_ids)
+        self.patches, self.masks_train, self.bvals, self.bvecs = self.prepare_data(data)
 
 
     def __len__(self):
@@ -125,7 +124,7 @@ class HCPUKADataset(Dataset):
                 raise Exception("unknown mode")
             patches.extend(patches_ss)
             wm_masks.extend(wm_masks_ss)
-            bvals.extend(subject["gtab"].bvals)
+            bvals.extend(subject["gtab"].hcpbvals)
             bvecs.extend(subject["gtab"].bvecs)
             del patches_ss
             del wm_masks_ss

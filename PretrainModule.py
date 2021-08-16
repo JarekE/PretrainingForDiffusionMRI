@@ -1,12 +1,8 @@
 import torch
 import torch.nn as nn
-from torch.nn import functional as F
 import pytorch_lightning as pl
-import sys
 import matplotlib.pyplot as plt
 import torchmetrics
-import torchvision
-import numpy as np
 from UNet3d import UNet3d
 
 import config_pretrain

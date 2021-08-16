@@ -3,7 +3,6 @@ from torch.utils.data import DataLoader
 import torchio as tio
 
 import config_pretrain
-import sys
 
 # if sys.argv[1] == "server":
 #     from PretrainDataset import PretrainDataset
@@ -32,13 +31,13 @@ class PretrainDataModule(pl.LightningDataModule):
     def train_dataloader(self):
         train_dataset_pre = PretrainDataset(type="pretraining", transform=self.transforms)
         dataloader = DataLoader(train_dataset_pre, batch_size=config_pretrain.batch_size,
-                                     shuffle=False, num_workers=6)
+                                shuffle=False, num_workers=6)
 
         return dataloader
 
     def val_dataloader(self):
         val_dataset_pre = PretrainDataset(type="validation", transform=self.transforms)
         val_dataloader = DataLoader(val_dataset_pre, batch_size=config_pretrain.batch_size,
-                                         shuffle=False, num_workers=6)
+                                    shuffle=False, num_workers=6)
 
         return val_dataloader

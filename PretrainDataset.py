@@ -3,7 +3,6 @@ from dipy.io import read_bvals_bvecs
 from os.path import join as opj
 import numpy as np
 
-import sys
 from torch.utils.data import Dataset
 from scipy.ndimage.morphology import binary_erosion
 from tqdm import tqdm
