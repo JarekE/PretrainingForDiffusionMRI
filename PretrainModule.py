@@ -12,8 +12,8 @@ class PretrainAutoencoder(pl.LightningModule):
 
     def __init__(self):
         super(PretrainAutoencoder, self).__init__()
-        self.mse_metric = torchmetrics.MeanSquaredError()
-        self.loss = nn.MSELoss()
+        self.metric = torchmetrics.MeanAbsoluteError()
+        self.loss = nn.L1loss()
 
         self.unet = UNet3d()
         self.out_block = nn.Conv3d(config.num_filter, config.in_dim, kernel_size=1)
@@ -40,7 +40,7 @@ class PretrainAutoencoder(pl.LightningModule):
         groundtruth = batch["original"]
         output = self.forward(input)
 
-        loss = self.mse_metric(input.cpu(), output.cpu())
+        loss = self.metric(input.cpu(), output.cpu())
         self.log('Loss/Validation', loss)
 
         if batch_idx == 0:
