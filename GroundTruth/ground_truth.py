@@ -15,23 +15,23 @@ For safety reasons non part is selected, because the data already exists!
 import sys
 
 
-if sys.argv[2] == "server":
+if sys.argv[1] == "server":
     import semantic_segmentation
     import diffusion_fiber_GroundTruth
     import copy_uka
-elif sys.argv[2] == "pc_leon":
+elif sys.argv[1] == "pc_leon":
     from GroundTruth import semantic_segmentation
     from GroundTruth import diffusion_fiber_GroundTruth
-    from GroundTruth import copy_uka
+    from GroundTruth import copy_hcp
 else:
-    raise Exception("unknown second argument")
+    raise Exception("unknown first argument")
 
 
 def main():
 
     # prepare the data for the experiments and safe this in my folder structure
-    if 0:
-        copy_uka.data()
+    if 1:
+        copy_hcp.data()
 
     # Experiment 1 - Segmentation
     if 0:

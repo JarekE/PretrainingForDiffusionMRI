@@ -6,6 +6,7 @@ from torch.utils.data import Dataset
 from scipy.ndimage.morphology import binary_erosion
 from tqdm import tqdm
 
+
 import config
 
 def crop_brain_and_switch_axis(dwi):
@@ -13,7 +14,7 @@ def crop_brain_and_switch_axis(dwi):
     patch = np.moveaxis(dwi, 3, 0)
 
     # crop to 56, 72, 56
-    # TODO: check crop in dataloaders
+
     ch, x,y,z = patch.shape
     x1 = x//2-28
     x2 = x//2+28
@@ -55,6 +56,7 @@ class PretrainDataset(Dataset):
             edw[brainmask == 0] = 0
             edw[np.isnan(edw)] = 0
 
+            # delete b0 layer
             edw = np.delete(edw, np.where(bvals == 0), axis=3)
 
             self.patches.append(crop_brain_and_switch_axis(edw.astype(np.float32)))

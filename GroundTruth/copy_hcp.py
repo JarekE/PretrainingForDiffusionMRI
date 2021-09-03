@@ -1,10 +1,8 @@
 # This file is used to safe the necessary data in my own datastructure
 # Idea: Take data from HCP2019 and change (the dimension) + b-values
+
 from os.path import join as opj
 import os
-from dipy.io.image import load_nifti, save_nifti
-from dipy.io.gradients import read_bvals_bvecs
-import numpy as np
 import shutil
 
 

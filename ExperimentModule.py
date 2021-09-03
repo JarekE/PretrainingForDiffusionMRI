@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 from torch.nn import functional as F
 from pytorch_lightning.core.lightning import LightningModule
-import torchmetrics
+#import torchmetrics
 import math
 import matplotlib.pyplot as plt
 import numpy as np
@@ -119,7 +119,6 @@ class ExperimentModule(LightningModule):
                 plt.show()
             else:
                 print("This output will be here in the near future!")
-
 
         val_loss = self.loss(output, target)
         self.log('Loss/Validation', val_loss)

@@ -2,14 +2,13 @@ import torch
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.loggers import TensorBoardLogger
-
+import sys
 # from pytorch_lightning import seed_everything
 
 from ExperimentModule import ExperimentModule
 import ExperimentDataloader
-import sys
-
 import config
+
 
 '''
 Argument 1:
@@ -62,7 +61,7 @@ def main():
                                           filename=config.filename,
                                           save_top_k=1)
 
-    logger = TensorBoardLogger(config.log_dir, name="Pretrain", default_hp_metric=False)
+    logger = TensorBoardLogger(config.log_dir, name="Train", default_hp_metric=False)
 
     trainer = pl.Trainer(gpus=1,
                          max_epochs=config.max_epochs,

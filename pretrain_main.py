@@ -35,7 +35,7 @@ def main():
 
     dataloader = PretrainDataloader.PretrainDataModule(distortions=distortions)
 
-    checkpoint_callback = ModelCheckpoint(monitor='Loss/Validation',
+    checkpoint_callback = ModelCheckpoint(monitor='val_loss',
                                           dirpath=config.dirpath,
                                           filename=config.filename,
                                           save_top_k=1)
@@ -50,8 +50,11 @@ def main():
                          log_every_n_steps=10)
 
     trainer.fit(model, datamodule=dataloader)
-    torch.save(model.unet.state_dict(), opj(config.dirpath, "pretrained_model.pt"))
 
+    if sys.argv[1] == "nodist":
+        torch.save(model.unet.state_dict(), opj(config.dirpath, "pretrained_model.pt"))
+    elif sys.argv[1] == "dist":
+        torch.save(model.unet.state_dict(), opj(config.dirpath, "pretrained_model_dist.pt"))
 
 if __name__ == '__main__':
     main()

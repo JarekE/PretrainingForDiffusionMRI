@@ -1,8 +1,8 @@
 import torch
 import torch.nn as nn
 import pytorch_lightning as pl
-import matplotlib.pyplot as plt
 import torchmetrics
+import matplotlib.pyplot as plt
 
 from UNet3d import UNet3d
 import config
@@ -13,7 +13,7 @@ class PretrainAutoencoder(pl.LightningModule):
     def __init__(self):
         super(PretrainAutoencoder, self).__init__()
         self.metric = torchmetrics.MeanAbsoluteError()
-        self.loss = nn.L1loss()
+        self.loss = nn.L1Loss()
 
         self.unet = UNet3d()
         self.out_block = nn.Conv3d(config.num_filter, config.in_dim, kernel_size=1)
@@ -40,8 +40,37 @@ class PretrainAutoencoder(pl.LightningModule):
         groundtruth = batch["original"]
         output = self.forward(input)
 
+        if 0 and (batch_idx == 0):
+            plt.figure("Cropped Data")
+
+            plt.subplot(2, 3, 1).set_axis_off()
+            plt.title("Data: 1")
+            plt.imshow(input[0, 10, :, :, 25].cpu().T, cmap='gray', origin='lower')
+
+            plt.subplot(2, 3, 2).set_axis_off()
+            plt.title("Data: 2")
+            plt.imshow(input[0, 10, :, 35, :].cpu().T, cmap='gray', origin='lower')
+
+            plt.subplot(2, 3, 3).set_axis_off()
+            plt.title("Data: 3")
+            plt.imshow(input[0, 10, 25, :, :].cpu().T, cmap='gray', origin='lower')
+
+            plt.subplot(2, 3, 4).set_axis_off()
+            plt.title("Data: 1")
+            plt.imshow(output[0, 10, :, :, 25].cpu().T, cmap='gray', origin='lower')
+
+            plt.subplot(2, 3, 5).set_axis_off()
+            plt.title("Data: 2")
+            plt.imshow(output[0, 10, :, 35, :].cpu().T, cmap='gray', origin='lower')
+
+            plt.subplot(2, 3, 6).set_axis_off()
+            plt.title("Data: 3")
+            plt.imshow(output[0, 10, 25, :, :].cpu().T, cmap='gray', origin='lower')
+
+            plt.show()
+
         loss = self.metric(input.cpu(), output.cpu())
-        self.log('Loss/Validation', loss)
+        self.log('val_loss', loss)
 
         if batch_idx == 0:
             #%% Save example image to Tensorboard logger
