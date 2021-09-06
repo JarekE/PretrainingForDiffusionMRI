@@ -3,6 +3,7 @@ import pytorch_lightning as pl
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.loggers import TensorBoardLogger
 import sys
+import os
 # from pytorch_lightning import seed_everything
 
 from ExperimentModule import ExperimentModule
@@ -32,6 +33,16 @@ Number of fiber directions in one voxel (0-3)
 regression (Experiment 3a)
 Use for regression task with two parameters (direction of first fiber, e.g. polar coordinates)
 
+-------------------------------------------
+
+Argument 3:
+
+dist
+Uses the pretrained network with distortions
+
+nodist
+Doesn't use distortions
+
 '''
 
 
@@ -46,22 +57,26 @@ def main():
         print("unkown learning mode")
         raise Exception
 
+    if sys.argv[3] == "dist":
+        distortions = True
+    elif sys.argv[3] == "nodist":
+        distortions = False
 
     torch.cuda.empty_cache()
 
     # Reproducibility for every run (important to compare pretraining)
     # seed_everything(42)
 
-    model = ExperimentModule(learning_mode=learning_mode, pretrained=pretrained)
+    model = ExperimentModule(learning_mode=learning_mode, pretrained=pretrained, distortions=distortions)
 
     dataloader = ExperimentDataloader.DataModule(learning_mode=learning_mode)
 
-    checkpoint_callback = ModelCheckpoint(monitor='Loss/Validation',
+    checkpoint_callback = ModelCheckpoint(monitor='val_loss',
                                           dirpath=config.dirpath,
-                                          filename=config.filename,
+                                          filename=config.filenameExperiment,
                                           save_top_k=1)
 
-    logger = TensorBoardLogger(config.log_dir, name="Train", default_hp_metric=False)
+    logger = TensorBoardLogger(config.log_dir, name=os.path.join('Train', config.version), default_hp_metric=False)
 
     trainer = pl.Trainer(gpus=1,
                          max_epochs=config.max_epochs,

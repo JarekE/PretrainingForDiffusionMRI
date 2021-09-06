@@ -1,6 +1,7 @@
 import os
+import sys
 
-func_test = False
+func_test = True
 
 #%% Neural Network Parameters
 in_dim = 64
@@ -22,9 +23,12 @@ if func_test == True:
 #%% Logging
 username = os.path.expanduser("~").split("/")[-1]
 dirpath = os.path.join('/work/scratch', username, 'PretrainingForDiffusionMRI/Pretraining/checkpoints_pretraining')
-filename = 'UNET-{epoch:02d}-{val_loss:.2f}'
+pre_version = str(sys.argv[1])
+version = str(sys.argv[1])+str(sys.argv[2])+str(sys.argv[3])
+filename = 'UNET-{epoch:02d}-{val_loss:.2f}'+pre_version
+filenameExperiment = 'UNET-{epoch:02d}-{val_loss:.2f}'+version
 
-log_dir = os.path.join('/work/scratch', username, 'tensorboard_logger/pretrain_checkpoints')
+log_dir = os.path.join('/work/scratch', username, 'tensorboard_logger/PretrainingForDiffusionMRI')
 
 #%% Data settings
 

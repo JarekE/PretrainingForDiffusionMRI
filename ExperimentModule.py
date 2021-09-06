@@ -18,13 +18,16 @@ from UNet3d import UNet3d
 
 class ExperimentModule(LightningModule):
 
-    def __init__(self, learning_mode, pretrained):
+    def __init__(self, learning_mode, pretrained, distortions):
         super(ExperimentModule, self).__init__()
 
         self.unet = UNet3d()
 
         if pretrained:
-            self.unet.load_state_dict(torch.load(opj(config.dirpath, "pretrained_model.pt")))
+            if distortions:
+                self.unet.load_state_dict(torch.load(opj(config.dirpath, "pretrained_model_distortions.pt")))
+            else:
+                self.unet.load_state_dict(torch.load(opj(config.dirpath, "pretrained_model.pt")))
 
         self.learning_mode = learning_mode
 
@@ -121,7 +124,7 @@ class ExperimentModule(LightningModule):
                 print("This output will be here in the near future!")
 
         val_loss = self.loss(output, target)
-        self.log('Loss/Validation', val_loss)
+        self.log('val_loss', val_loss)
         return val_loss
 
     def validation_epoch_end(self, validation_step_outputs):
@@ -134,7 +137,7 @@ class ExperimentModule(LightningModule):
         output = self.forward(input)
 
         val_loss = self.loss(output, target)
-        self.log('Loss/Validation', val_loss)
+        self.log('val_loss', val_loss)
         return val_loss
 
     def on_test_epoch_end(self):
