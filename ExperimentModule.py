@@ -33,13 +33,13 @@ class ExperimentModule(LightningModule):
 
         if self.learning_mode == "n_peaks":
             self.out_block = nn.Conv3d(config.num_filter, config.out_dim_peaks, kernel_size=1)
-            self.loss = nn.MSELoss()
+            self.loss = nn.L1Loss()
         elif self.learning_mode == "regression":
             self.out_block = nn.Conv3d(config.num_filter, config.out_dim_regression, kernel_size=1)
             self.loss = nn.MSELoss()
         elif self.learning_mode == "segmentation":
             self.out_block = nn.Conv3d(config.num_filter, config.out_dim_segmentation, kernel_size=1)
-            self.loss = nn.MSELoss()
+            self.loss = nn.L1Loss()
         else:
             raise Exception("unknown learning modus")
 
@@ -53,28 +53,6 @@ class ExperimentModule(LightningModule):
 
         output = self.forward(input)
 
-        if 0:
-            axial_middle = output.shape[2] // 2
-            plt.figure('Showing the datasets')
-
-            plt.subplot(2, 2, 1).set_axis_off()
-            plt.title("Input")
-            plt.imshow(input.cpu().detach().numpy()[0, 11, :, axial_middle, :].T, cmap='gray', origin='lower')
-
-            plt.subplot(2, 2, 2).set_axis_off()
-            plt.title("Input")
-            plt.imshow(input.cpu().detach().numpy()[2, 11, :, axial_middle, :].T, cmap='gray', origin='lower')
-
-            plt.subplot(2, 2, 3).set_axis_off()
-            plt.title("Output")
-            plt.imshow(output.cpu().detach().numpy()[0, 11, :, axial_middle, :].T, cmap='gray', origin='lower')
-
-            plt.subplot(2, 2, 4).set_axis_off()
-            plt.title("Output")
-            plt.imshow(output.cpu().detach().numpy()[2, 11, :, axial_middle, :].T, cmap='gray', origin='lower')
-
-            plt.show()
-
         train_loss = self.loss(output, target)
         self.log('Loss/Train', train_loss)
         return train_loss
@@ -84,6 +62,28 @@ class ExperimentModule(LightningModule):
         input = batch['input']
 
         output = self.forward(input)
+
+        if 1:
+            axial_middle = output.shape[2] // 2
+            plt.figure('Showing the datasets')
+
+            plt.subplot(2, 2, 1).set_axis_off()
+            plt.title("Input")
+            plt.imshow(input.cpu().detach().numpy()[0, 11, :, axial_middle, :].T, cmap='gray', origin='lower')
+
+            plt.subplot(2, 2, 2).set_axis_off()
+            plt.title("Output 0.5")
+            plt.imshow((output.cpu().detach().numpy() > 0.5).astype(int)[0, 1, :, axial_middle, :].T, cmap='gray', origin='lower')
+
+            plt.subplot(2, 2, 3).set_axis_off()
+            plt.title("Target")
+            plt.imshow(target.cpu().detach().numpy()[0, 1, :, axial_middle, :].T, cmap='gray', origin='lower')
+
+            plt.subplot(2, 2, 4).set_axis_off()
+            plt.title("Output")
+            plt.imshow(output.cpu().detach().numpy()[0, 1, :, axial_middle, :].T, cmap='gray', origin='lower')
+
+            plt.show()
 
         if 0:
             if self.learning_mode == "out_number":

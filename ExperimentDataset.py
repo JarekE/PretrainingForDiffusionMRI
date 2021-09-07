@@ -12,17 +12,48 @@ def crop_brain_and_switch_axis(dwi, target):
 
     patch_dwi = np.moveaxis(dwi, 3, 0)
 
-    # crop to 56, 72, 56
+    # crop to 64, 80, 56
     ch, x,y,z = patch_dwi.shape
-    x1 = x//2-28
-    x2 = x//2+28
-    y1 = y//2-32
+    x1 = x//2-32
+    x2 = x//2+32
+    y1 = y//2-40
     y2 = y//2+40
 
     patch_dwi = patch_dwi[:, x1:x2,y1:y2,:]
     patch_target = target[:, x1:x2,y1:y2,:]
-    patch_dwi = np.concatenate((np.zeros((*patch_dwi.shape[:3],1)), patch_dwi, np.zeros((*patch_dwi.shape[:3],1))), axis=-1, dtype=dwi.dtype)
-    patch_target = np.concatenate((np.zeros((*patch_target.shape[:3],1)), patch_target, np.zeros((*patch_target.shape[:3],1))), axis=-1, dtype=dwi.dtype)    #every site of the picture has to be --> site mod 8 = 0
+    patch_dwi = np.float32(np.concatenate((np.zeros((*patch_dwi.shape[:3],1)), patch_dwi, np.zeros((*patch_dwi.shape[:3],1))), axis=-1))
+    patch_target = np.float32(np.concatenate((np.zeros((*patch_target.shape[:3],1)), patch_target, np.zeros((*patch_target.shape[:3],1))), axis=-1) )   #every site of the picture has to be --> site mod 8 = 0
+
+    if 0:
+        plt.figure("Cropped Data")
+
+        plt.subplot(2, 3, 1).set_axis_off()
+        plt.title("Data: 1")
+        plt.imshow(patch_dwi[30, :, :, 25].T, cmap='gray', origin='lower')
+
+        plt.subplot(2, 3, 2).set_axis_off()
+        plt.title("Data: 2")
+        plt.imshow(patch_dwi[20, :, 35, :].T, cmap='gray', origin='lower')
+
+        plt.subplot(2, 3, 3).set_axis_off()
+        plt.title("Data: 3")
+        plt.imshow(patch_dwi[10, 25, :, :].T, cmap='gray', origin='lower')
+
+        plt.subplot(2, 3, 4).set_axis_off()
+        plt.title("Data: 1")
+        plt.imshow(patch_target[0, :, :, 25].T, cmap='gray', origin='lower')
+
+        plt.subplot(2, 3, 5).set_axis_off()
+        plt.title("Data: 2")
+        plt.imshow(patch_target[1, :, 35, :].T, cmap='gray', origin='lower')
+
+        plt.subplot(2, 3, 6).set_axis_off()
+        plt.title("Data: 3")
+        plt.imshow(patch_target[2, 25, :, :].T, cmap='gray', origin='lower')
+
+        plt.show()
+
+
 
     return (patch_dwi, patch_target)
 
@@ -38,6 +69,7 @@ class UKADataset(Dataset):
 
         print("\n Loading data...")
         for subject in tqdm(self.subject_ids):
+
             subdir = opj(config.img_path_uka, subject)
             subdir_gt = opj(subdir, "groundtruth")
 

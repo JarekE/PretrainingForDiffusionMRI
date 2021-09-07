@@ -1,7 +1,7 @@
 import os
 import sys
 
-func_test = True
+func_test = False
 
 #%% Neural Network Parameters
 in_dim = 64
@@ -15,9 +15,9 @@ num_filter = 16
 batch_size = 3
 lr = 0.001
 training_samples_per_epoch = 100
-max_epochs = 100
+max_epochs = 300
 if func_test == True:
-    max_epochs = 5
+    max_epochs = 10
     training_samples_per_epoch = 4
 
 #%% Logging
