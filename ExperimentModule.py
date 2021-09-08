@@ -7,10 +7,12 @@ import math
 import matplotlib.pyplot as plt
 import numpy as np
 from os.path import join as opj
+from matplotlib import colors
 from pandas import DataFrame
 from openpyxl import load_workbook
 import pandas as pd
 import os
+from tabulate import tabulate
 
 import config
 from UNet3d import UNet3d
@@ -36,7 +38,8 @@ class ExperimentModule(LightningModule):
             self.loss = nn.L1Loss()
         elif self.learning_mode == "regression":
             self.out_block = nn.Conv3d(config.num_filter, config.out_dim_regression, kernel_size=1)
-            self.loss = nn.MSELoss()
+            # MAE (MSE is not working properly)
+            self.loss = nn.L1Loss()
         elif self.learning_mode == "segmentation":
             self.out_block = nn.Conv3d(config.num_filter, config.out_dim_segmentation, kernel_size=1)
             self.loss = nn.L1Loss()
@@ -63,7 +66,7 @@ class ExperimentModule(LightningModule):
 
         output = self.forward(input)
 
-        if 1:
+        if 0:
             axial_middle = output.shape[2] // 2
             plt.figure('Showing the datasets')
 
@@ -85,43 +88,19 @@ class ExperimentModule(LightningModule):
 
             plt.show()
 
-        if 0:
-            if self.learning_mode == "out_number":
-                axial_middle = output.shape[2] // 2
-                plt.figure('Showing the datasets')
-
-                plt.subplot(3, 1, 1).set_axis_off()
-                plt.title("Input")
-                plt.imshow(input.cpu().detach().numpy()[0, 10, :, axial_middle, :].T, cmap='gray', origin='lower')
-
-                plt.subplot(3, 1, 2).set_axis_off()
-                plt.title("Output")
-                plt.imshow(output.cpu().detach().numpy()[0, 2, :, axial_middle, :].T, cmap='gray', origin='lower')
-
-                plt.subplot(3, 1, 3).set_axis_off()
-                plt.title("Label")
-                plt.imshow(label.cpu().detach().numpy()[0, 2, :, axial_middle, :].T, cmap='gray', origin='lower')
-
-                plt.show()
-            elif self.learning_mode == "out":
-                axial_middle = output.shape[2] // 2
-                plt.figure('Showing the datasets')
-
-                plt.subplot(3, 1, 1).set_axis_off()
-                plt.title("Input")
-                plt.imshow(input.cpu().detach().numpy()[0, 11, :, axial_middle, :].T, cmap='gray', origin='lower')
-
-                plt.subplot(3, 1, 2).set_axis_off()
-                plt.title("Output")
-                plt.imshow((output.cpu().detach().numpy() > 0.5).astype(int)[0, 1, :, axial_middle, :].T, cmap='gray', origin='lower')
-
-                plt.subplot(3, 1, 3).set_axis_off()
-                plt.title("Label")
-                plt.imshow(label.cpu().detach().numpy()[0, 1, :, axial_middle, :].T, cmap='gray', origin='lower')
-
-                plt.show()
-            else:
-                print("This output will be here in the near future!")
+        if 1:
+            #data: batch_idx, theta/phi, x,y,z
+            data = [[1, output[0,0,32,40,25].item(), target[0,0,32,40,25].item(), output[0,1,32,40,25].item(),
+                     target[0,1,32,40,25].item()],
+                    [2, output[1,0,32,40,25].item(), target[1,0,32,40,25].item(), output[1,1,32,40,25].item(),
+                     target[1,1,32,40,25].item()],
+                    [3, output[0, 0, 5, 5, 5].item(), target[0, 0, 5, 5, 5].item(),
+                     output[0, 1, 5, 5, 5].item(), target[0, 1, 5, 5, 5].item()],
+                    [4, output[1, 0, 5, 5, 5].item(), target[1, 0, 5, 5, 5].item(),
+                     output[1, 1, 5, 5, 5].item(), target[1, 1, 5, 5, 5].item()]]
+            print("\n")
+            print(tabulate(data, headers=["Number", "Output:Theta", "Target:Theta", "Output:Phi", "Target:Phi"]))
+            print("\n")
 
         val_loss = self.loss(output, target)
         self.log('val_loss', val_loss)
