@@ -1,18 +1,11 @@
 import torch
 import torch.nn as nn
-from torch.nn import functional as F
 from pytorch_lightning.core.lightning import LightningModule
-#import torchmetrics
-import math
 import matplotlib.pyplot as plt
 import numpy as np
 from os.path import join as opj
-from matplotlib import colors
-from pandas import DataFrame
-from openpyxl import load_workbook
-import pandas as pd
-import os
 from tabulate import tabulate
+import sys
 
 import config
 from UNet3d import UNet3d
@@ -88,7 +81,7 @@ class ExperimentModule(LightningModule):
 
             plt.show()
 
-        if 1:
+        if sys.argv[2] == "regression":
             #data: batch_idx, theta/phi, x,y,z
             data = [[1, output[0,0,32,40,25].item(), target[0,0,32,40,25].item(), output[0,1,32,40,25].item(),
                      target[0,1,32,40,25].item()],
@@ -104,6 +97,11 @@ class ExperimentModule(LightningModule):
 
         val_loss = self.loss(output, target)
         self.log('val_loss', val_loss)
+
+        print("\n")
+        print("Validation Loss:", val_loss)
+        print("\n")
+
         return val_loss
 
     def validation_epoch_end(self, validation_step_outputs):

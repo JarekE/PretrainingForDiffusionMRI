@@ -1,7 +1,7 @@
 import os
 import sys
 
-func_test = False
+func_test = True
 
 #%% Neural Network Parameters
 in_dim = 64
@@ -13,8 +13,11 @@ num_filter = 16
 
 #%% Training Parameters
 batch_size = 3
-#lr = 0.001
-lr=0.0001
+if sys.argv[2] == "regression":
+    lr= 0.0001
+    #lr = 0.0000001
+else:
+    lr = 0.001
 training_samples_per_epoch = 100
 max_epochs = 100
 if func_test == True:
