@@ -40,7 +40,7 @@ class PretrainAutoencoder(pl.LightningModule):
         groundtruth = batch["original"]
         output = self.forward(input)
 
-        if 1 and (batch_idx == 0):
+        if 0 and (batch_idx == 0):
             plt.figure("Cropped Data")
 
             plt.subplot(2, 3, 1).set_axis_off()

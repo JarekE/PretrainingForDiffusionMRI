@@ -59,12 +59,25 @@ def crop_brain_and_switch_axis(dwi, target):
     return (patch_dwi, patch_target)
 
 
-def reconstruct_vector(target, reconstruct_array, pi):
-    target = target * pi
+def reconstruct_vector(target, reconstruct_array, pi, original_directions):
+    target[0, ...] = target[0, ...] * pi
+    target[1, ...] = target[1, ...] * pi
 
+    # reconstruct hemisphere
+    target[0, ...] = np.where(reconstruct_array == 1, (-target[0, ...] + pi) , target[0, ...])
+    target[1, ...] = np.where(reconstruct_array == 1, (target[1, ...] - pi), target[1, ...])
 
+    vector3d = np.zeros((90, 90, 54, 3))
 
-    return target
+    # spherical to cartessian
+    vector3d[..., 0] = np.sin(target[0, ...]) * np.cos(target[1, ...])
+    vector3d[..., 1] = np.sin(target[0, ...]) * np.sin(target[1, ...])
+    vector3d[..., 2] = np.cos(target[0, ...])
+
+    vector3d = original_directions - vector3d
+    vector3d = np.where(vector3d<0.01, 0, vector3d)
+
+    return np.nonzero(vector3d)
 
 class UKADataset(Dataset):
     def __init__(self, type, learning_mode):
@@ -146,9 +159,11 @@ class UKADataset(Dataset):
                 new_directions[..., 1] = (new_directions[..., 1] / pi_array)
 
                 target = np.moveaxis(new_directions[...,0:2], 3, 0)
+                # 4 zero values are nan -> checked!
+                target = np.nan_to_num(target)
 
                 # (For testing) can be used to reconstruct CNN output as well
-                reconstructed_directions = reconstruct_vector(target, recon_array, pi_array)
+                reconstructed_directions = reconstruct_vector(target, recon_array, pi_array, directions)
 
 
             if self.learning_mode == "n_peaks":

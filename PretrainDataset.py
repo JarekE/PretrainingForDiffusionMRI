@@ -5,6 +5,8 @@ import numpy as np
 from torch.utils.data import Dataset
 from scipy.ndimage.morphology import binary_erosion
 from tqdm import tqdm
+import matplotlib.pyplot as plt
+from matplotlib import colors
 
 
 import config
@@ -14,7 +16,6 @@ def crop_brain_and_switch_axis(dwi):
     patch = np.moveaxis(dwi, 3, 0)
 
     # crop to 56, 72, 56
-
     ch, x,y,z = patch.shape
     x1 = x//2-28
     x2 = x//2+28
@@ -72,7 +73,42 @@ class PretrainDataset(Dataset):
         patch = self.patches[idx]
 
         if self.transform:
+            # 64,56,72,56 -> "perfect" data
+            # TODO: here is a possible opportunity for additional patch-wise artifacts
+            # Problem: Always new computed!
             input = self.transform(patch)
+
+            if 0:
+                # cmap = colors.ListedColormap(['black', 'red', 'green', 'blue'])
+                cmap = 'gray'
+                plt.figure("Transformations")
+
+                plt.subplot(2, 3, 1).set_axis_off()
+                plt.title("Data")
+                plt.imshow(patch[30, :, :, 25].T, cmap='gray', origin='lower')
+
+                plt.subplot(2, 3, 2).set_axis_off()
+                plt.title("Data")
+                plt.imshow(patch[30, :, 35, :].T, cmap='gray', origin='lower')
+
+                plt.subplot(2, 3, 3).set_axis_off()
+                plt.title("Data")
+                plt.imshow(patch[30, 25, :, :].T, cmap='gray', origin='lower')
+
+                plt.subplot(2, 3, 4).set_axis_off()
+                plt.title("Transformations")
+                plt.imshow(input[30, :, :, 25].T, cmap=cmap, origin='lower')
+
+                plt.subplot(2, 3, 5).set_axis_off()
+                plt.title("Transformations")
+                plt.imshow(input[30, :, 35, :].T, cmap=cmap, origin='lower')
+
+                plt.subplot(2, 3, 6).set_axis_off()
+                plt.title("Transformations")
+                plt.imshow(input[30, 25, :, :].T, cmap=cmap, origin='lower')
+
+                plt.show()
+
         else:
             input = patch
         a=0

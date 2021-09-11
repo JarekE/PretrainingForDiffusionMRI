@@ -16,9 +16,6 @@ class PretrainDataModule(pl.LightningDataModule):
             # RandomGhosting>0.9 => zu starke Verzerrungen
             tio_biasfield = tio.RandomBiasField()
             tio_noise = tio.RandomNoise()
-            """
-            add distortions from BA (Ranking of distortions may be relevant)
-            """
             self.transforms = tio.Compose([tio_motion, tio_ghosting, tio_biasfield, tio_noise])
             #self.tio_transforms = tio.Compose([tio_motion, tio_ghosting, tio_biasfield])
         else:

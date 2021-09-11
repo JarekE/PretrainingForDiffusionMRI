@@ -6,6 +6,7 @@ import numpy as np
 from os.path import join as opj
 from tabulate import tabulate
 import sys
+from torchmetrics import F1, Accuracy
 
 import config
 from UNet3d import UNet3d
@@ -31,11 +32,12 @@ class ExperimentModule(LightningModule):
             self.loss = nn.L1Loss()
         elif self.learning_mode == "regression":
             self.out_block = nn.Conv3d(config.num_filter, config.out_dim_regression, kernel_size=1)
-            # MAE (MSE is not working properly)
-            self.loss = nn.L1Loss()
+            self.loss = nn.MSELoss()
         elif self.learning_mode == "segmentation":
             self.out_block = nn.Conv3d(config.num_filter, config.out_dim_segmentation, kernel_size=1)
             self.loss = nn.L1Loss()
+            self.metric = F1(threshold=0.5)
+            self.metric2 = Accuracy()
         else:
             raise Exception("unknown learning modus")
 
@@ -111,11 +113,20 @@ class ExperimentModule(LightningModule):
         target = batch['target']
         input = batch['input']
 
-        output = self.forward(input)
+        for i in range(len(target[:,0,0,0,0])):
 
-        val_loss = self.loss(output, target)
-        self.log('val_loss', val_loss)
-        return val_loss
+            output = self.forward(torch.unsqueeze(input[i, :, :, :, :], 0))
+
+            test_loss = self.loss(target[i, :, :, :, :], output[0, :, :, :, :])
+            self.log('test_loss', test_loss, on_step=True)
+
+            metric = self.metric(output[0, :, :, :, :].cpu(), target[i, :, :, :, :].int().cpu())
+            self.log('f1', metric, on_step=True)
+            print(metric)
+
+            metric2 = self.metric2(output[0, :, :, :, :].cpu(), target[i, :, :, :, :].int().cpu())
+            self.log('Accuracy', metric2)
+
 
     def on_test_epoch_end(self):
         pass

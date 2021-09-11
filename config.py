@@ -1,7 +1,7 @@
 import os
 import sys
 
-func_test = True
+func_test = False
 
 #%% Neural Network Parameters
 in_dim = 64
@@ -14,12 +14,12 @@ num_filter = 16
 #%% Training Parameters
 batch_size = 3
 if sys.argv[2] == "regression":
-    lr= 0.0001
-    #lr = 0.0000001
+    lr= 0.001
 else:
     lr = 0.001
+
 training_samples_per_epoch = 100
-max_epochs = 100
+max_epochs = 1000
 if func_test == True:
     max_epochs = 10
     training_samples_per_epoch = 4
@@ -31,6 +31,7 @@ pre_version = str(sys.argv[1])
 version = str(sys.argv[1])+str(sys.argv[2])+str(sys.argv[3])
 filename = 'UNET-{epoch:02d}-{val_loss:.2f}'+pre_version
 filenameExperiment = 'UNET-{epoch:02d}-{val_loss:.2f}'+version
+checkpoint = dirpath + "/" + pre_version
 
 log_dir = os.path.join('/work/scratch', username, 'tensorboard_logger/PretrainingForDiffusionMRI')
 
