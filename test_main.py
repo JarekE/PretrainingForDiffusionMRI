@@ -51,7 +51,7 @@ def main():
 
     torch.cuda.empty_cache()
 
-    model = ExperimentModule(learning_mode=learning_mode, pretrained=False, distortions=False)
+    model = ExperimentModule.load_from_checkpoint(config.checkpoint, learning_mode=learning_mode, pretrained=False, distortions=False)
 
     dataloader = ExperimentDataloader.DataModule(learning_mode=learning_mode)
 
@@ -61,7 +61,6 @@ def main():
                          max_epochs=config.max_epochs,
                          deterministic=True,
                          logger=logger,
-                         resume_from_checkpoint=config.checkpoint,
                          log_every_n_steps=1)
 
     trainer.test(model, test_dataloaders=dataloader)

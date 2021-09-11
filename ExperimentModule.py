@@ -2,11 +2,13 @@ import torch
 import torch.nn as nn
 from pytorch_lightning.core.lightning import LightningModule
 import matplotlib.pyplot as plt
-import numpy as np
 from os.path import join as opj
 from tabulate import tabulate
 import sys
-from torchmetrics import F1, Accuracy
+from torchmetrics import F1, Accuracy, MeanSquaredError, MeanAbsoluteError
+import pandas as pd
+import numpy as np
+from openpyxl import load_workbook
 
 import config
 from UNet3d import UNet3d
@@ -30,9 +32,13 @@ class ExperimentModule(LightningModule):
         if self.learning_mode == "n_peaks":
             self.out_block = nn.Conv3d(config.num_filter, config.out_dim_peaks, kernel_size=1)
             self.loss = nn.L1Loss()
+            self.metric = F1(threshold=0.5)
+            self.metric2 = Accuracy()
         elif self.learning_mode == "regression":
             self.out_block = nn.Conv3d(config.num_filter, config.out_dim_regression, kernel_size=1)
             self.loss = nn.MSELoss()
+            self.metric = MeanSquaredError()
+            self.metric2 = MeanAbsoluteError()
         elif self.learning_mode == "segmentation":
             self.out_block = nn.Conv3d(config.num_filter, config.out_dim_segmentation, kernel_size=1)
             self.loss = nn.L1Loss()
@@ -112,6 +118,7 @@ class ExperimentModule(LightningModule):
     def test_step(self, batch, batch_idx):
         target = batch['target']
         input = batch['input']
+        log = np.zeros([len(target[:,0,0,0,0]),4])
 
         for i in range(len(target[:,0,0,0,0])):
 
@@ -121,11 +128,25 @@ class ExperimentModule(LightningModule):
             self.log('test_loss', test_loss, on_step=True)
 
             metric = self.metric(output[0, :, :, :, :].cpu(), target[i, :, :, :, :].int().cpu())
-            self.log('f1', metric, on_step=True)
-            print(metric)
+            self.log('f1ORMSE', metric, on_step=True)
 
             metric2 = self.metric2(output[0, :, :, :, :].cpu(), target[i, :, :, :, :].int().cpu())
-            self.log('Accuracy', metric2)
+            self.log('AccuracyORMAE', metric2, on_step=True)
+
+            log[i,0] = batch_idx
+            log[i,1] = test_loss.item()
+            log[i,2] = metric.item()
+            log[i,3] = metric2.item()
+
+        df = pd.DataFrame(log)
+
+
+        writer = pd.ExcelWriter(config.log_path, engine='openpyxl')
+        writer.book = load_workbook(config.log_path)
+        writer.sheets = dict((ws.title, ws) for ws in writer.book.worksheets)
+        reader = pd.read_excel(config.log_path)
+        df.to_excel(writer, sheet_name="RawData", index=True, header=False, startrow=len(reader) + 1)
+        writer.close()
 
 
     def on_test_epoch_end(self):
