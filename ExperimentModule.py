@@ -23,9 +23,9 @@ class ExperimentModule(LightningModule):
 
         if pretrained:
             if distortions:
-                self.unet.load_state_dict(torch.load(opj(config.dirpath, "pretrained_model_distortions.pt")))
+                self.unet.load_state_dict(torch.load(opj(config.dirpath, "distallpretrained_model.pt")))
             else:
-                self.unet.load_state_dict(torch.load(opj(config.dirpath, "pretrained_model.pt")))
+                self.unet.load_state_dict(torch.load(opj(config.dirpath, "nodistpretrained_model.pt")))
 
         self.learning_mode = learning_mode
 
@@ -137,9 +137,9 @@ class ExperimentModule(LightningModule):
             log[i,1] = test_loss.item()
             log[i,2] = metric.item()
             log[i,3] = metric2.item()
+            #log[i,4] = sys.argv[1]
 
         df = pd.DataFrame(log)
-
 
         writer = pd.ExcelWriter(config.log_path, engine='openpyxl')
         writer.book = load_workbook(config.log_path)
@@ -147,7 +147,6 @@ class ExperimentModule(LightningModule):
         reader = pd.read_excel(config.log_path)
         df.to_excel(writer, sheet_name="RawData", index=True, header=False, startrow=len(reader) + 1)
         writer.close()
-
 
     def on_test_epoch_end(self):
         pass

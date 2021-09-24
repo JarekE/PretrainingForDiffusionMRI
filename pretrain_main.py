@@ -19,6 +19,29 @@ Implements distortions in input data
 
 nodist
 Data has no distortions
+
+-------------------------------------------
+
+Argument 2:
+
+no
+-- only if arg1 = nodist --
+
+all
+Use all distortions
+
+motion
+Only motion
+
+ghosting
+...
+
+bias
+...
+
+noise
+...
+
 '''
 
 
@@ -29,6 +52,10 @@ def main():
     elif sys.argv[1] == "nodist":
         distortions = False
     torch.cuda.empty_cache()
+
+    if not sys.argv[2] in ("all", "motion", "ghosting", "bias", "noise"):
+        print("unkown second argument")
+        raise Exception
 
     # Reproducibility for every run (important to compare pretraining)
     # seed_everything(42)
@@ -53,10 +80,7 @@ def main():
 
     trainer.fit(model, datamodule=dataloader)
 
-    if distortions:
-        torch.save(model.unet.state_dict(), opj(config.dirpath, "pretrained_model_distortions.pt"))
-    else:
-        torch.save(model.unet.state_dict(), opj(config.dirpath, "pretrained_model.pt"))
+    torch.save(model.unet.state_dict(), opj(config.dirpath, config.pt_model))
 
 if __name__ == '__main__':
     main()

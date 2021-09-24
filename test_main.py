@@ -47,7 +47,7 @@ def main():
         print("unknown learning mode")
         raise Exception
 
-    forFutureUsage = sys.argv[3]
+    #forFutureUsage = sys.argv[3]
 
     torch.cuda.empty_cache()
 

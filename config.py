@@ -19,7 +19,17 @@ else:
     lr = 0.001
 
 training_samples_per_epoch = 100
-max_epochs = 1000
+
+# find maximal best solution for different experiments
+if sys.argv[2] == "segmentation":
+    max_epochs = 3000
+elif sys.argv[2] == "n_peaks":
+    max_epochs = 2000 
+elif sys.argv[2] == "regression":
+    max_epochs = 600
+else:
+    max_epochs = 300
+
 if func_test == True:
     max_epochs = 10
     training_samples_per_epoch = 4
@@ -27,11 +37,12 @@ if func_test == True:
 #%% Logging
 username = os.path.expanduser("~").split("/")[-1]
 dirpath = os.path.join('/work/scratch', username, 'PretrainingForDiffusionMRI/Pretraining/checkpoints_pretraining')
-pre_version = str(sys.argv[1])
-version = str(sys.argv[1])+str(sys.argv[2])+str(sys.argv[3])
+pre_version = str(sys.argv[1])+str(sys.argv[2])
+version = str(sys.argv[1])+str(sys.argv[2])+str(sys.argv[3])+"long"
 filename = 'UNET-{epoch:02d}-{val_loss:.2f}'+pre_version
 filenameExperiment = 'UNET-{epoch:02d}-{val_loss:.2f}'+version
-checkpoint = dirpath + "/" + pre_version
+checkpoint = dirpath + "/" + str(sys.argv[1])
+pt_model = pre_version+"pretrained_model.pt"
 
 log_path = '/work/scratch/ecke/PretrainingForDiffusionMRI/Results.xlsx'
 log_dir = os.path.join('/work/scratch', username, 'tensorboard_logger/PretrainingForDiffusionMRI')
@@ -49,7 +60,7 @@ if func_test is False:
     }
 else:
     hcp_subjects = {
-        "pretraining": all_hcp_subjects[0:3],
+        "pretraining": all_hcp_subjects[0:7],
         "validation": all_hcp_subjects[0:3],
     }
 

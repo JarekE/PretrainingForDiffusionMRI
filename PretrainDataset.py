@@ -7,6 +7,8 @@ from scipy.ndimage.morphology import binary_erosion
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 from matplotlib import colors
+from PretrainDistortions import Transformation
+from random import random
 
 
 import config
@@ -74,9 +76,11 @@ class PretrainDataset(Dataset):
 
         if self.transform:
             # 64,56,72,56 -> "perfect" data
-            # TODO: here is a possible opportunity for additional patch-wise artifacts
-            # Problem: Always new computed!
-            input = self.transform(patch)
+            # Always new computed!
+
+            input2 = np.float32(Transformation([56, 72, 56]).forward((patch)))
+            input = self.transform(input2)
+
 
             if 0:
                 # cmap = colors.ListedColormap(['black', 'red', 'green', 'blue'])
