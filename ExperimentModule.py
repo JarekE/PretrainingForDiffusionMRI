@@ -23,7 +23,14 @@ class ExperimentModule(LightningModule):
 
         if pretrained:
             if distortions:
-                self.unet.load_state_dict(torch.load(opj(config.dirpath, "distallpretrained_model.pt")))
+                if sys.argv[3] == "light":
+                    self.unet.load_state_dict(torch.load(opj(config.dirpath, "distlightpretrained_model.pt")))
+                if sys.argv[3] == "normal":
+                    self.unet.load_state_dict(torch.load(opj(config.dirpath, "distnormalpretrained_model.pt")))
+                if sys.argv[3] == "strong":
+                    self.unet.load_state_dict(torch.load(opj(config.dirpath, "diststrongpretrained_model.pt")))
+                if sys.argv[3] == "dist":
+                    self.unet.load_state_dict(torch.load(opj(config.dirpath, "distallpretrained_model.pt")))
             else:
                 self.unet.load_state_dict(torch.load(opj(config.dirpath, "nodistpretrained_model.pt")))
 

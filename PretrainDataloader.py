@@ -27,6 +27,25 @@ class PretrainDataModule(pl.LightningDataModule):
                 self.transforms = tio.RandomBiasField()
             if sys.argv[2] == "noise":
                 self.transforms = tio.RandomNoise()
+            if sys.argv[2] == "light":
+                tio_motion = tio.RandomMotion(degrees=5, translation=5, num_transforms=1)
+                tio_ghosting = tio.RandomGhosting(num_ghosts=(0, 1), intensity=(0,0.5), restore=0.02)
+                tio_biasfield = tio.RandomBiasField(coefficients=0.3)
+                tio_noise = tio.RandomNoise(std=0.1)
+                self.transforms = tio.Compose([tio_motion, tio_ghosting, tio_biasfield, tio_noise])
+            if sys.argv[2] == "normal":
+                tio_motion = tio.RandomMotion()
+                tio_ghosting = tio.RandomGhosting(num_ghosts=(0, 2), intensity=(0,0.9), restore=0.02)
+                tio_biasfield = tio.RandomBiasField()
+                tio_noise = tio.RandomNoise()
+                self.transforms = tio.Compose([tio_motion, tio_ghosting, tio_biasfield, tio_noise])
+                #self.transforms = tio.Compose([tio_motion, tio_ghosting, tio_biasfield])
+            if sys.argv[2] == "strong":
+                tio_motion = tio.RandomMotion(degrees=15, translation=15, num_transforms=3)
+                tio_ghosting = tio.RandomGhosting(num_ghosts=(1, 3), intensity=(0.5,0.9), restore=0.02)
+                tio_biasfield = tio.RandomBiasField(coefficients=0.7)
+                tio_noise = tio.RandomNoise(std=0.3)
+                self.transforms = tio.Compose([tio_motion, tio_ghosting, tio_biasfield, tio_noise])
 
         else:
             self.transforms = None

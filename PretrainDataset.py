@@ -81,37 +81,33 @@ class PretrainDataset(Dataset):
             input2 = np.float32(Transformation([56, 72, 56]).forward((patch)))
             input = self.transform(input2)
 
+        #print test images; for better results deactivate noise!
+        if 0:
 
-            if 0:
-                # cmap = colors.ListedColormap(['black', 'red', 'green', 'blue'])
-                cmap = 'gray'
-                plt.figure("Transformations")
+            input = self.transform(np.float32(Transformation([56, 72, 56]).forward((patch))))
+            input2 = self.transform(np.float32(Transformation([56, 72, 56]).forward((patch))))
+            input3 = self.transform(np.float32(Transformation([56, 72, 56]).forward((patch))))
 
-                plt.subplot(2, 3, 1).set_axis_off()
-                plt.title("Data")
-                plt.imshow(patch[30, :, :, 25].T, cmap='gray', origin='lower')
+            cmap = 'gray'
+            plt.figure("Transformations")
 
-                plt.subplot(2, 3, 2).set_axis_off()
-                plt.title("Data")
-                plt.imshow(patch[30, :, 35, :].T, cmap='gray', origin='lower')
+            plt.subplot(1, 4, 1).set_axis_off()
+            plt.title("Original")
+            plt.imshow(patch[30, :, :, 25].T, cmap='gray', origin='lower')
 
-                plt.subplot(2, 3, 3).set_axis_off()
-                plt.title("Data")
-                plt.imshow(patch[30, 25, :, :].T, cmap='gray', origin='lower')
+            plt.subplot(1, 4, 2).set_axis_off()
+            plt.title("Distorted")
+            plt.imshow(input[30, :, :, 25].T, cmap='gray', origin='lower')
 
-                plt.subplot(2, 3, 4).set_axis_off()
-                plt.title("Transformations")
-                plt.imshow(input[30, :, :, 25].T, cmap=cmap, origin='lower')
+            plt.subplot(1, 4, 3).set_axis_off()
+            plt.title("Distorted")
+            plt.imshow(input2[30, :, :, 25].T, cmap='gray', origin='lower')
 
-                plt.subplot(2, 3, 5).set_axis_off()
-                plt.title("Transformations")
-                plt.imshow(input[30, :, 35, :].T, cmap=cmap, origin='lower')
+            plt.subplot(1, 4, 4).set_axis_off()
+            plt.title("Distorted")
+            plt.imshow(input3[30, :, :, 25].T, cmap=cmap, origin='lower')
 
-                plt.subplot(2, 3, 6).set_axis_off()
-                plt.title("Transformations")
-                plt.imshow(input[30, 25, :, :].T, cmap=cmap, origin='lower')
-
-                plt.show()
+            plt.show()
 
         else:
             input = patch

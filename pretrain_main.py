@@ -35,12 +35,21 @@ Only motion
 
 ghosting
 ...
-
+ 
 bias
 ...
 
 noise
 ...
+
+light
+Uses all distortions, but in a light version
+
+normal
+Uses all distortions, but in a normal strong version
+
+strong
+Uses all distortions, but in a light version
 
 '''
 
@@ -53,7 +62,7 @@ def main():
         distortions = False
     torch.cuda.empty_cache()
 
-    if not sys.argv[2] in ("all", "motion", "ghosting", "bias", "noise"):
+    if not sys.argv[2] in ("all", "motion", "ghosting", "bias", "noise", "light", "normal", "strong"):
         print("unkown second argument")
         raise Exception
 

@@ -43,6 +43,17 @@ Uses the pretrained network with distortions
 nodist
 Doesn't use distortions
 
+Special Cases: -----------------------------
+
+light
+Uses all distortions, but in a light version
+
+normal
+Uses all distortions, but in a normal strong version
+
+strong
+Uses all distortions, but in a light version
+
 '''
 
 
@@ -57,10 +68,14 @@ def main():
         print("unkown learning mode")
         raise Exception
 
-    if sys.argv[3] == "dist":
-        distortions = True
-    elif sys.argv[3] == "nodist":
+    dis_mode = sys.argv[3]
+    if dis_mode == "nodist":
         distortions = False
+    else:
+        distortions = True
+    if not dis_mode in ("dist", "nodist", "light", "normal", "strong"):
+        print("unkown distortion mode")
+        raise Exception
 
     torch.cuda.empty_cache()
 

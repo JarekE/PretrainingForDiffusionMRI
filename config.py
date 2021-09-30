@@ -22,11 +22,11 @@ training_samples_per_epoch = 100
 
 # find maximal best solution for different experiments
 if sys.argv[2] == "segmentation":
-    max_epochs = 3000
+    max_epochs = 1500
 elif sys.argv[2] == "n_peaks":
-    max_epochs = 2000 
+    max_epochs = 1000
 elif sys.argv[2] == "regression":
-    max_epochs = 600
+    max_epochs = 300
 else:
     max_epochs = 300
 
@@ -38,7 +38,7 @@ if func_test == True:
 username = os.path.expanduser("~").split("/")[-1]
 dirpath = os.path.join('/work/scratch', username, 'PretrainingForDiffusionMRI/Pretraining/checkpoints_pretraining')
 pre_version = str(sys.argv[1])+str(sys.argv[2])
-version = str(sys.argv[1])+str(sys.argv[2])+str(sys.argv[3])+"long"
+version = str(sys.argv[1])+str(sys.argv[2])+str(sys.argv[3])
 filename = 'UNET-{epoch:02d}-{val_loss:.2f}'+pre_version
 filenameExperiment = 'UNET-{epoch:02d}-{val_loss:.2f}'+version
 checkpoint = dirpath + "/" + str(sys.argv[1])
