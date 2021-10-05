@@ -77,7 +77,7 @@ def main():
         print("unkown distortion mode")
         raise Exception
 
-    torch.cuda.empty_cache()
+    torch.cuda.empty_cache() 
 
     # Reproducibility for every run (important to compare pretraining)
     # seed_everything(42)

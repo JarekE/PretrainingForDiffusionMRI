@@ -44,7 +44,7 @@ filenameExperiment = 'UNET-{epoch:02d}-{val_loss:.2f}'+version
 checkpoint = dirpath + "/" + str(sys.argv[1])
 pt_model = pre_version+"pretrained_model.pt"
 
-log_path = '/work/scratch/ecke/PretrainingForDiffusionMRI/Results.xlsx'
+log_path = '/work/scratch/ecke/PretrainingForDiffusionMRI/Compare_Pretraining.xlsx'
 log_dir = os.path.join('/work/scratch', username, 'tensorboard_logger/PretrainingForDiffusionMRI')
 
 #%% Data settings
