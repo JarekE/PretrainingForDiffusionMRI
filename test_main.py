@@ -37,6 +37,14 @@ Argument 3:
 
 No usage in the moment. Important due to the number of 3 arguments in the general application.
 
+-------------------------------------------
+
+Argument 4:
+
+cross-validation mode
+
+-------------------------------------------
+
 '''
 
 
@@ -45,6 +53,10 @@ def main():
     learning_mode = sys.argv[2]
     if not learning_mode in ("segmentation", "n_peaks", "regression"):
         print("unknown learning mode")
+        raise Exception
+
+    if not sys.argv[4] in ("1", "2", "3", "4", "5", "6", "7"):
+        print("unkown cross-validation mode")
         raise Exception
 
     #forFutureUsage = sys.argv[3]

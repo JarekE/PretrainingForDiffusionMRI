@@ -54,6 +54,11 @@ Uses all distortions, but in a normal strong version
 strong
 Uses all distortions, but in a light version
 
+Argument 4:
+
+1-7
+Cross-validation
+
 '''
 
 
@@ -76,6 +81,11 @@ def main():
     if not dis_mode in ("dist", "nodist", "light", "normal", "strong"):
         print("unkown distortion mode")
         raise Exception
+
+    if not sys.argv[4] in ("1", "2", "3", "4", "5", "6", "7"):
+        print("unkown cross-validation mode")
+        raise Exception
+
 
     torch.cuda.empty_cache() 
 

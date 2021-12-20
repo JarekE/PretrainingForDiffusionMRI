@@ -52,7 +52,7 @@ class ExperimentModule(LightningModule):
             self.metric = F1(threshold=0.5)
             self.metric2 = Accuracy()
         else:
-            raise Exception("unknown learning modus")
+            raise Exception("unknown learning mode")
 
     def forward(self, z):
         y = self.unet(z)
@@ -96,6 +96,7 @@ class ExperimentModule(LightningModule):
 
             plt.show()
 
+        """
         if sys.argv[2] == "regression":
             #data: batch_idx, theta/phi, x,y,z
             data = [[1, output[0,0,32,40,25].item(), target[0,0,32,40,25].item(), output[0,1,32,40,25].item(),
@@ -109,6 +110,7 @@ class ExperimentModule(LightningModule):
             print("\n")
             print(tabulate(data, headers=["Number", "Output:Theta", "Target:Theta", "Output:Phi", "Target:Phi"]))
             print("\n")
+        """
 
         val_loss = self.loss(output, target)
         self.log('val_loss', val_loss)

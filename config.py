@@ -2,6 +2,7 @@ import os
 import sys
 
 func_test = False
+#test
 
 #%% Neural Network Parameters
 in_dim = 64
@@ -38,7 +39,7 @@ if func_test == True:
 username = os.path.expanduser("~").split("/")[-1]
 dirpath = os.path.join('/work/scratch', username, 'PretrainingForDiffusionMRI/Pretraining/checkpoints_pretraining')
 pre_version = str(sys.argv[1])+str(sys.argv[2])
-version = str(sys.argv[1])+str(sys.argv[2])+str(sys.argv[3])
+version = str(sys.argv[1])+str(sys.argv[2])+str(sys.argv[3])+str(sys.argv[4])
 filename = 'UNET-{epoch:02d}-{val_loss:.2f}'+pre_version
 filenameExperiment = 'UNET-{epoch:02d}-{val_loss:.2f}'+version
 checkpoint = dirpath + "/" + str(sys.argv[1])
@@ -69,11 +70,48 @@ all_uka_subjects = os.listdir(img_path_uka)
 all_uka_subjects.sort()
 
 if func_test is False:
-    uka_subjects = {
-        "training": all_uka_subjects[0:15],
-        "validation": all_uka_subjects[15:20],
-        "test": all_uka_subjects[20:]
-    }
+    if sys.argv[4] == "1":
+        uka_subjects = {
+            "training": all_uka_subjects[8:28],
+            "validation": all_uka_subjects[4:8],
+            "test": all_uka_subjects[0:4]
+        }
+    if sys.argv[4] == "2":
+        uka_subjects = {
+            "training": (all_uka_subjects[0:4] + all_uka_subjects[12:28]),
+            "validation": all_uka_subjects[8:12],
+            "test": all_uka_subjects[4:8]
+        }
+    if sys.argv[4] == "3":
+        uka_subjects = {
+            "training": (all_uka_subjects[0:8] + all_uka_subjects[16:28]),
+            "validation": all_uka_subjects[12:16],
+            "test": all_uka_subjects[8:12]
+        }
+    if sys.argv[4] == "4":
+        uka_subjects = {
+            "training": (all_uka_subjects[0:12] + all_uka_subjects[20:28]),
+            "validation": all_uka_subjects[16:20],
+            "test": all_uka_subjects[12:16]
+        }
+    if sys.argv[4] == "5":
+        uka_subjects = {
+            "training": (all_uka_subjects[0:16] + all_uka_subjects[24:28]),
+            "validation": all_uka_subjects[20:24],
+            "test": all_uka_subjects[16:20]
+        }
+    if sys.argv[4] == "6":
+        uka_subjects = {
+            "training": all_uka_subjects[0:20],
+            "validation": all_uka_subjects[24:28],
+            "test": all_uka_subjects[20:24]
+        }
+    if sys.argv[4] == "7":
+        uka_subjects = {
+            "training": all_uka_subjects[4:24],
+            "validation": all_uka_subjects[0:4],
+            "test": all_uka_subjects[24:28]
+        }
 else:
     uka_subjects = {
         "training": all_uka_subjects[0:3],
