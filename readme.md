@@ -20,9 +20,14 @@ XXX
 - PyTorch 0.4.0   
 - Dipy  
 - Scikit-image  
-- Scikit-learn  
+- Scikit-learn 
 
+Irgendwas über Bilder und die Verlinkungen in config schreiben 
 
-## NEWCHAPTER
+## Pretrained models
 
-XXX
+PretrainedModels folder 
+
+## Important parameters (config)
+
+in_dim => gradient directions of dMRI = 64 (eigene Daten abpassen)

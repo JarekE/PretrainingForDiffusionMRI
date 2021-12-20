@@ -3,11 +3,12 @@ import torch.nn as nn
 from pytorch_lightning.core.lightning import LightningModule
 import matplotlib.pyplot as plt
 from os.path import join as opj
-from tabulate import tabulate
 import sys
+import os
 from torchmetrics import F1, Accuracy, MeanSquaredError, MeanAbsoluteError
 import pandas as pd
 import numpy as np
+import openpyxl
 from openpyxl import load_workbook
 
 import config
@@ -96,22 +97,6 @@ class ExperimentModule(LightningModule):
 
             plt.show()
 
-        """
-        if sys.argv[2] == "regression":
-            #data: batch_idx, theta/phi, x,y,z
-            data = [[1, output[0,0,32,40,25].item(), target[0,0,32,40,25].item(), output[0,1,32,40,25].item(),
-                     target[0,1,32,40,25].item()],
-                    [2, output[1,0,32,40,25].item(), target[1,0,32,40,25].item(), output[1,1,32,40,25].item(),
-                     target[1,1,32,40,25].item()],
-                    [3, output[0, 0, 5, 5, 5].item(), target[0, 0, 5, 5, 5].item(),
-                     output[0, 1, 5, 5, 5].item(), target[0, 1, 5, 5, 5].item()],
-                    [4, output[1, 0, 5, 5, 5].item(), target[1, 0, 5, 5, 5].item(),
-                     output[1, 1, 5, 5, 5].item(), target[1, 1, 5, 5, 5].item()]]
-            print("\n")
-            print(tabulate(data, headers=["Number", "Output:Theta", "Target:Theta", "Output:Phi", "Target:Phi"]))
-            print("\n")
-        """
-
         val_loss = self.loss(output, target)
         self.log('val_loss', val_loss)
 
@@ -146,10 +131,13 @@ class ExperimentModule(LightningModule):
             log[i,1] = test_loss.item()
             log[i,2] = metric.item()
             log[i,3] = metric2.item()
-            #log[i,4] = sys.argv[1]
 
         df = pd.DataFrame(log)
 
+        if not os.path.exists(config.log_path):
+            wb = openpyxl.Workbook()
+            wb.title = "RawData"
+            wb.save(filename=config.log_path)
         writer = pd.ExcelWriter(config.log_path, engine='openpyxl')
         writer.book = load_workbook(config.log_path)
         writer.sheets = dict((ws.title, ws) for ws in writer.book.worksheets)

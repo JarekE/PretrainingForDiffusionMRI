@@ -9,11 +9,12 @@ from matplotlib import colors
 
 import config
 
+
 def crop_brain_and_switch_axis(dwi, target):
 
     patch_dwi = np.moveaxis(dwi, 3, 0)
 
-    # crop to 64, 80, 56
+    # crop to new size (64, 80, 56)
     ch, x,y,z = patch_dwi.shape
     x1 = x//2-32
     x2 = x//2+32
@@ -58,7 +59,6 @@ def crop_brain_and_switch_axis(dwi, target):
 
     return (patch_dwi, patch_target)
 
-
 def reconstruct_vector(target, reconstruct_array, pi, original_directions):
     target[0, ...] = target[0, ...] * pi
     target[1, ...] = target[1, ...] * pi
@@ -69,7 +69,7 @@ def reconstruct_vector(target, reconstruct_array, pi, original_directions):
 
     vector3d = np.zeros((90, 90, 54, 3))
 
-    # spherical to cartessian
+    # spherical to Cartesian
     vector3d[..., 0] = np.sin(target[0, ...]) * np.cos(target[1, ...])
     vector3d[..., 1] = np.sin(target[0, ...]) * np.sin(target[1, ...])
     vector3d[..., 2] = np.cos(target[0, ...])
@@ -80,6 +80,7 @@ def reconstruct_vector(target, reconstruct_array, pi, original_directions):
     return np.nonzero(vector3d)
 
 class UKADataset(Dataset):
+
     def __init__(self, type, learning_mode):
 
         self.type = type
@@ -101,7 +102,7 @@ class UKADataset(Dataset):
             bvals, bvecs = read_bvals_bvecs(opj(subdir, "bvals"), opj(subdir, "bvecs"))
             bvals = np.around(bvals / 1000).astype(np.int) * 1000
 
-            # scale the b-values between 1 and 0 (Diffusionsabschwächung)
+            # scale the b-values between 1 and 0 (diffusion attenuation)
             meanb0 = np.expand_dims(np.mean(dwi[..., bvals < 150], axis=-1), axis=-1)
             edw = np.divide(dwi, meanb0)
             edw[edw > 1] = 1
@@ -112,7 +113,7 @@ class UKADataset(Dataset):
             # delete b0 values
             edw = np.delete(edw, np.where(bvals == 0), axis=3)
 
-            # find your mask
+            # compute mask
             if self.learning_mode == "segmentation":
                 segmentation, _ = load_nifti(opj(subdir, "fs_seg.nii.gz"))
 
@@ -159,12 +160,7 @@ class UKADataset(Dataset):
                 new_directions[..., 1] = (new_directions[..., 1] / pi_array)
 
                 target = np.moveaxis(new_directions[...,0:2], 3, 0)
-                # 4 zero values are nan -> checked!
                 target = np.nan_to_num(target)
-
-                # (For testing) can be used to reconstruct CNN output as well
-                reconstructed_directions = reconstruct_vector(target, recon_array, pi_array, directions)
-
 
             if self.learning_mode == "n_peaks":
                 number_of_peaks = np.load(opj(subdir_gt, "n_peaks.npy"))

@@ -5,6 +5,7 @@ import config
 
 
 class UNet3d(nn.Module):
+
     def __init__(self):
         super(UNet3d, self).__init__()
 

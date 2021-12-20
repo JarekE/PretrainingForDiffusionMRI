@@ -1,6 +1,5 @@
 import torch
 import pytorch_lightning as pl
-from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.loggers import TensorBoardLogger
 import sys
 import os
@@ -23,27 +22,28 @@ Argument 2:
 MUST MATCH TO LINK (ARGUMENT 1)
 
 segmentation (Experiment 1)
-Use for normal classification of the brain components (WM, GM, CSF, BG)
+Normal classification of the brain components (WM, GM, CSF, Background)
 
 n_peaks (Experiment 2)
 Number of fiber directions in one voxel (0-3)
 
-regression (Experiment 3a)
-Use for regression task with two parameters (direction of first fiber, e.g. polar coordinates)
+regression (Experiment 3)
+Regression task with two parameters in polar coordinates (direction of strongest fiber)
 
 -------------------------------------------
 
 Argument 3:
 
-No usage in the moment. Important due to the number of 3 arguments in the general application.
+No usage in the moment. Important due to the number of arguments in the general application.
 
 -------------------------------------------
 
 Argument 4:
 
-cross-validation mode
+MUST MATCH TO LINK (ARGUMENT 1)
 
--------------------------------------------
+Number 1-7
+Cross-validation (Define train, validation and test data)
 
 '''
 
@@ -56,7 +56,7 @@ def main():
         raise Exception
 
     if not sys.argv[4] in ("1", "2", "3", "4", "5", "6", "7"):
-        print("unkown cross-validation mode")
+        print("unknown cross-validation mode")
         raise Exception
 
     #forFutureUsage = sys.argv[3]

@@ -18,59 +18,66 @@ pre
 Uses the pretrained network for the calculations (best available version)
 
 nopre
-Doesn't use the pretraining
+Doe not use the pretraining
 
 -------------------------------------------
 
 Argument 2:  
 
 segmentation (Experiment 1)
-Use for normal classification of the brain components (WM, GM, CSF, BG)
+Normal classification of the brain components (WM, GM, CSF, Background)
 
 n_peaks (Experiment 2)
 Number of fiber directions in one voxel (0-3)
 
-regression (Experiment 3a)
-Use for regression task with two parameters (direction of first fiber, e.g. polar coordinates)
+regression (Experiment 3)
+Regression task with two parameters in polar coordinates (direction of strongest fiber)
 
 -------------------------------------------
 
 Argument 3:
 
 dist
-Uses the pretrained network with distortions
+The pretrained network with distortions
 
 nodist
-Doesn't use distortions
+Does not use distortions in the pretrained network
 
-Special Cases: -----------------------------
+Special Cases for Argument 3: --------------
 
 light
-Uses all distortions, but in a light version
+All distortions, but in a light version
 
 normal
-Uses all distortions, but in a normal strong version
+All distortions, but in a normal strong version
 
 strong
-Uses all distortions, but in a light version
+All distortions, but in a strong version
+
+-------------------------------------------
 
 Argument 4:
 
-1-7
-Cross-validation
+Number 1-7
+Cross-validation (Define train, validation and test data)
 
 '''
 
 
 def main():
+
+    # system arguments
     if sys.argv[1] == "pre":
         pretrained = True
     elif sys.argv[1] == "nopre":
         pretrained = False
+    if not sys.argv[1] in ("pre", "nopre"):
+        print('unknown first argument')
+        raise Exception
 
     learning_mode = sys.argv[2]
     if not learning_mode in ("segmentation", "n_peaks", "regression"):
-        print("unkown learning mode")
+        print('unknown learning mode')
         raise Exception
 
     dis_mode = sys.argv[3]
@@ -79,13 +86,12 @@ def main():
     else:
         distortions = True
     if not dis_mode in ("dist", "nodist", "light", "normal", "strong"):
-        print("unkown distortion mode")
+        print('unknown distortion mode')
         raise Exception
 
     if not sys.argv[4] in ("1", "2", "3", "4", "5", "6", "7"):
-        print("unkown cross-validation mode")
+        print('unknown cross-validation number')
         raise Exception
-
 
     torch.cuda.empty_cache() 
 
@@ -97,7 +103,7 @@ def main():
     dataloader = ExperimentDataloader.DataModule(learning_mode=learning_mode)
 
     checkpoint_callback = ModelCheckpoint(monitor='val_loss',
-                                          dirpath=config.dirpath,
+                                          dirpath='',
                                           filename=config.filenameExperiment,
                                           save_top_k=1)
 

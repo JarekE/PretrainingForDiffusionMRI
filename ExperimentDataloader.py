@@ -4,6 +4,7 @@ from torch.utils.data import DataLoader
 import config
 from ExperimentDataset import UKADataset
 
+
 class DataModule(pl.LightningDataModule):
 
     def __init__(self, learning_mode):

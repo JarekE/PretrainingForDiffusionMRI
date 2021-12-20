@@ -1,8 +1,7 @@
 import os
 import sys
 
-func_test = False
-#test
+func_test = True
 
 #%% Neural Network Parameters
 in_dim = 64
@@ -37,33 +36,17 @@ if func_test == True:
 
 #%% Logging
 username = os.path.expanduser("~").split("/")[-1]
-dirpath = os.path.join('/work/scratch', username, 'PretrainingForDiffusionMRI/Pretraining/checkpoints_pretraining')
+dirpath = 'PretrainedModels'
 pre_version = str(sys.argv[1])+str(sys.argv[2])
 version = str(sys.argv[1])+str(sys.argv[2])+str(sys.argv[3])+str(sys.argv[4])
-filename = 'UNET-{epoch:02d}-{val_loss:.2f}'+pre_version
 filenameExperiment = 'UNET-{epoch:02d}-{val_loss:.2f}'+version
-checkpoint = dirpath + "/" + str(sys.argv[1])
-pt_model = pre_version+"pretrained_model.pt"
+checkpoint = str(sys.argv[1])
 
-log_path = '/work/scratch/ecke/PretrainingForDiffusionMRI/Compare_Pretraining.xlsx'
-log_dir = os.path.join('/work/scratch', username, 'tensorboard_logger/PretrainingForDiffusionMRI')
+# Collect data for training and testing
+log_path = 'TestData.xlsx'
+log_dir = 'TensorBoard'
 
 #%% Data settings
-
-img_path_hcp = '/images/Diffusion_Imaging/pretraining_evaluation/hcp'
-all_hcp_subjects = os.listdir(img_path_hcp)
-all_hcp_subjects.sort()
-
-if func_test is False:
-    hcp_subjects = {
-        "pretraining": all_hcp_subjects[0:46],
-        "validation": all_hcp_subjects[46:50],
-    }
-else:
-    hcp_subjects = {
-        "pretraining": all_hcp_subjects[0:7],
-        "validation": all_hcp_subjects[0:3],
-    }
 
 img_path_uka = '/images/Diffusion_Imaging/pretraining_evaluation/uka'
 all_uka_subjects = os.listdir(img_path_uka)
