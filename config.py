@@ -20,7 +20,7 @@ else:
 
 training_samples_per_epoch = 100
 
-# find maximal best solution for different experiments
+# number of epochs for efficient training with maximum results
 if sys.argv[2] == "segmentation":
     max_epochs = 1500
 elif sys.argv[2] == "n_peaks":
@@ -47,7 +47,6 @@ log_path = 'TestData.xlsx'
 log_dir = 'TensorBoard'
 
 #%% Data settings
-
 img_path_uka = '/images/Diffusion_Imaging/pretraining_evaluation/uka'
 all_uka_subjects = os.listdir(img_path_uka)
 all_uka_subjects.sort()
