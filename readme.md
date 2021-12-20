@@ -2,9 +2,10 @@
 
 Please note that we do not share any data sets here. Pretraining was calculated with data from the HCP project (http://www.humanconnectomeproject.org/data/).
 For the evaluation and further test series, dMRI data with the dimensions (90,90,54) and 64 gradient directions 
-are require and the dimensions can be adjusted.
+are required (the dimensions can be adjusted).
 
 For any questions concerning the code, please feel free to open an issue.
+
 Details on the method and implementations can be found in the paper XXX.
 
 ## Overview
