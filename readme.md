@@ -1,25 +1,28 @@
-The subfolders are independent programmes and can be executed independently.
+# Diffusion MRI Specific Pretraining by Self-Supervision on an Auxiliary Dataset
 
-The GroundTruth data already exist and the pretraining is currently only available
-in a preliminary test version.
+XXX
 
-All 3 tests can be executed, but are in the basic version.
+XXX
 
-Segmentation (1)  
-Number of Peaks (2)  
---- Direction of Peak (Classification) (3a)  --> killed ---
-Direction of Peak (Regression) (3)   
+Please note that you can use public dMRI Datasets for this repository, for example:  
+XXX
 
-Data:
-"/images/Diffusion_Imaging/pretraining_evaluation/..."
+For any questions concerning the code or submission, please feel free to open an issue.
 
-UKA: 
-Data:                           90,90,54 with 64 directions
-Number of peaks:                90,90,54
-Direction of strongest peak:    90,90,54
+## Prerequisites
 
-HCP:
-Data:                           76,91,76 with 65 directions (b0 layer!)
-No other datasets necessary (-> AutoEncoder pretraining)
+Depending on the task you want to check out, the following libraries may be needed:  
 
-(Both sets are in same spatial direction oriented)
+XXX
+
+- Python 3.6
+- Numpy  
+- PyTorch 0.4.0   
+- Dipy  
+- Scikit-image  
+- Scikit-learn  
+
+
+## NEWCHAPTER
+
+XXX
