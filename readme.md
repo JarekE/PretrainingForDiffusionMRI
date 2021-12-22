@@ -49,5 +49,5 @@ If you use our work, please cite the following paper:
 title = {Diffusion MRI Specific Pretraining by Self-Supervision on an Auxiliary Dataset},
 author = {Leon Weninger and Jarek Ecke and Chuh-Hyoun Na and Kerstin Juetten and Dorit Merhof}}
 year = {2022},
-journal = {Bildverarbeitung fuer die Medizin (BVM)},,
+journal = {Bildverarbeitung fuer die Medizin (BVM)}}
 ```
