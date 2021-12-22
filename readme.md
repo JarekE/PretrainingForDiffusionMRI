@@ -45,9 +45,9 @@ these are suitable for any dimensionality of dMRI data, but are limited to 64 gr
 
 If you use our work, please cite the following paper:
 ```tex
-@inproceedings{XXX,
+@inproceedings{WEN22a,
 title = {Diffusion MRI Specific Pretraining by Self-Supervision on an Auxiliary Dataset},
 author = {Leon Weninger and Jarek Ecke and Chuh-Hyoun Na and Kerstin Juetten and Dorit Merhof}}
-year = {20XX},
-booktitle = {XXX},
+year = {2022},
+journal = {Bildverarbeitung fuer die Medizin (BVM)},,
 ```
