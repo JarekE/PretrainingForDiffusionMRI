@@ -9,6 +9,10 @@ For any questions concerning the code, please feel free to open an issue.
 Details on the method and implementations can be found in the paper "Diffusion MRI Specific Pretraining by 
 Self-Supervision on an Auxiliary Dataset".
 
+## Example
+
+https://github.com/JarekE/PretrainingForDiffusionMRI/blob/master/example.ipynb
+
 ## Overview
 
 Training deep learning networks is very data intensive. Especially in
