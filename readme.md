@@ -9,6 +9,10 @@ For any questions concerning the code, please feel free to open an issue.
 Details on the method and implementations can be found in the paper "Diffusion MRI Specific Pretraining by 
 Self-Supervision on an Auxiliary Dataset".
 
+## Paper
+
+https://link.springer.com/chapter/10.1007/978-3-658-36932-3_32
+
 ## Example
 
 https://github.com/JarekE/PretrainingForDiffusionMRI/blob/master/example.ipynb
